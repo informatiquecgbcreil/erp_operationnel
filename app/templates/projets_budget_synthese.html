@@ -35,109 +35,78 @@
     {% set ecart_class = "kpi-value--danger" %}
   {% endif %}
 
-  <section class="card section-card">
-    <div class="section-head">
-      <h2 class="section-title">Synthèse financière</h2>
-      <span class="section-tag">4 KPI essentiels</span>
-    </div>
+  <section class="card budget-section">
+    <h2 class="section-title">Synthèse financière</h2>
     <div class="kpi-grid">
-      <div class="kpi">
-        <div class="kpi__label">Budget total</div>
-        <div class="kpi__value">{{ "%.2f"|format(total_charges) }}€</div>
-        <div class="kpi__help">Prévisionnel global du projet.</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Budget total</div>
+        <div class="kpi-value">{{ "%.2f"|format(total_charges) }}€</div>
+        <div class="kpi-help">Prévisionnel global du projet.</div>
       </div>
-      <div class="kpi">
-        <div class="kpi__label">Charges totales</div>
-        <div class="kpi__value">{{ "%.2f"|format(total_charges) }}€</div>
-        <div class="kpi__help">Somme des charges prévues.</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Charges totales</div>
+        <div class="kpi-value">{{ "%.2f"|format(total_charges) }}€</div>
+        <div class="kpi-help">Somme des charges prévues.</div>
       </div>
-      <div class="kpi">
-        <div class="kpi__label">Produits totaux ({{ produits_label }})</div>
-        <div class="kpi__value">{{ "%.2f"|format(total_produits) }}€</div>
-        <div class="kpi__help">Base la plus solide disponible.</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Produits totaux ({{ produits_label }})</div>
+        <div class="kpi-value">{{ "%.2f"|format(total_produits) }}€</div>
+        <div class="kpi-help">Base la plus solide disponible.</div>
       </div>
-      <div class="kpi">
-        <div class="kpi__label">Écart global (charges - produits)</div>
-        <div class="kpi__value {{ ecart_class }}">{{ "%.2f"|format(ecart) }}€</div>
-        <div class="kpi__help">Seul indicateur coloré.</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Écart global (charges - produits)</div>
+        <div class="kpi-value {{ ecart_class }}">{{ "%.2f"|format(ecart) }}€</div>
+        <div class="kpi-help">Seul indicateur coloré.</div>
       </div>
     </div>
   </section>
 
-  <section class="card section-card">
+  <section class="card budget-section">
     <div class="balance-header">
       <h2 class="section-title">Barre d’équilibre du projet</h2>
       <p class="muted">Visualisation rapide de la part financée et de la part à couvrir.</p>
     </div>
-    <div class="meter" role="img" aria-label="Barre d'équilibre du budget">
-      <div class="meter__fill" style="width: {{ pct_finance }}%;">
-        {% if pct_finance > 14 %}Financé{% endif %}
+    <div class="balance-bar" role="img" aria-label="Barre d'équilibre du budget">
+      <div class="balance-segment balance-segment--ok" style="width: {{ pct_finance }}%;">
+        {% if pct_finance > 12 %}Financé{% endif %}
       </div>
-      <div class="meter__rest" style="width: {{ pct_non_finance }}%;">
-        {% if pct_non_finance > 14 %}À couvrir{% endif %}
+      <div class="balance-segment balance-segment--warn" style="width: {{ pct_non_finance }}%;">
+        {% if pct_non_finance > 12 %}À couvrir{% endif %}
       </div>
     </div>
-    <div class="meter-legend">
-      <span><strong>{{ "%.0f"|format(pct_finance) }}%</strong> financé — {{ "%.2f"|format(total_charges_financees) }}€</span>
-      <span><strong>{{ "%.0f"|format(pct_non_finance) }}%</strong> à couvrir — {{ "%.2f"|format(total_charges_reste) }}€</span>
+    <div class="balance-legend">
+      <span><strong>{{ "%.0f"|format(pct_finance) }}%</strong> financé ({{ "%.2f"|format(total_charges_financees) }}€)</span>
+      <span><strong>{{ "%.0f"|format(pct_non_finance) }}%</strong> à couvrir ({{ "%.2f"|format(total_charges_reste) }}€)</span>
     </div>
   </section>
 
-  <section class="card section-card callout">
-    <div class="section-head">
-      <h2 class="section-title">À surveiller</h2>
-      <span class="section-tag">Max 3 alertes</span>
-    </div>
+  <section class="card budget-section budget-watch">
+    <h2 class="section-title">À surveiller</h2>
     <ul class="watch-list">
       {% for a in alertes[:3] %}
-        {% set amount = a.split('(')[-1].replace(')', '') if '(' in a and ')' in a else '' %}
         {% if "Charge non financée" in a %}
-          {% set detail = a.replace("Charge non financée : ", "").split('(')[0].strip() %}
-          <li class="watch-item">
-            <span>Une charge reste à financer : {{ detail }}.</span>
-            {% if amount %}<span class="pill">{{ amount }}</span>{% endif %}
-          </li>
+          {% set detail = a.replace("Charge non financée : ", "") %}
+          <li>Une charge reste à financer : {{ detail }}.</li>
         {% elif "Produit non ventilé" in a %}
-          {% set detail = a.replace("Produit non ventilé : ", "").split('(')[0].strip() %}
-          <li class="watch-item">
-            <span>Un financement est encore à ventiler : {{ detail }}.</span>
-            {% if amount %}<span class="pill">{{ amount }}</span>{% endif %}
-          </li>
+          {% set detail = a.replace("Produit non ventilé : ", "") %}
+          <li>Un financement est encore à ventiler : {{ detail }}.</li>
         {% else %}
-          <li class="watch-item">
-            <span>{{ a }}</span>
-            {% if amount %}<span class="pill">{{ amount }}</span>{% endif %}
-          </li>
+          <li>{{ a }}</li>
         {% endif %}
       {% else %}
-        <li class="watch-item muted">Rien de bloquant identifié : la trajectoire est claire.</li>
+        <li class="muted">Rien de bloquant identifié : la trajectoire est claire.</li>
       {% endfor %}
     </ul>
     {% if alertes|length > 3 %}
-      <button class="btn btn-sm btn-outline-primary watch-toggle" type="button" data-watch-toggle="budget-watch-more">
-        Voir {{ alertes|length - 3 }} autres
-      </button>
-      <ul class="watch-list watch-list--hidden" id="budget-watch-more">
-        {% for a in alertes[3:] %}
-          <li class="watch-item">
-            <span>{{ a }}</span>
-          </li>
-        {% endfor %}
-      </ul>
+      <div class="muted small">+ {{ alertes|length - 3 }} autre(s) point(s) à vérifier.</div>
     {% endif %}
   </section>
 
-  <section class="card section-card">
-    <div class="section-head">
-      <h2 class="section-title">Aperçu charges &amp; produits</h2>
-      <span class="section-tag">Vue macro</span>
-    </div>
+  <section class="card budget-section">
+    <h2 class="section-title">Aperçu charges &amp; produits</h2>
     <div class="macro-grid">
       <div class="macro-card">
-        <div class="macro-head">
-          <h3>Charges</h3>
-          <span class="pill pill--muted">Suivi dépenses</span>
-        </div>
+        <h3>Charges</h3>
         <div class="macro-line">
           <span class="muted">Charges totales</span>
           <strong>{{ "%.2f"|format(total_charges) }}€</strong>
@@ -150,17 +119,14 @@
           <span class="muted">Charges non financées</span>
           <strong>{{ "%.2f"|format(total_charges_reste) }}€</strong>
         </div>
-        <div class="mini-meter">
-          <div class="mini-meter__fill" style="width: {{ pct_finance }}%;"></div>
-          <div class="mini-meter__rest" style="width: {{ pct_non_finance }}%;"></div>
+        <div class="mini-bar">
+          <div class="mini-segment mini-segment--ok" style="width: {{ pct_finance }}%;"></div>
+          <div class="mini-segment mini-segment--warn" style="width: {{ pct_non_finance }}%;"></div>
         </div>
       </div>
 
       <div class="macro-card">
-        <div class="macro-head">
-          <h3>Produits</h3>
-          <span class="pill pill--ok">Sécurisation {{ "%.0f"|format(pct_securisation) }}%</span>
-        </div>
+        <h3>Produits</h3>
         <div class="macro-line">
           <span class="muted">Produits obtenus</span>
           <strong>{{ "%.2f"|format(total_recu) }}€</strong>
@@ -173,19 +139,16 @@
           <span class="muted">Taux de sécurisation</span>
           <strong>{{ "%.0f"|format(pct_securisation) }}%</strong>
         </div>
-        <div class="mini-meter">
-          <div class="mini-meter__fill mini-meter__fill--accent" style="width: {{ pct_recu }}%;"></div>
-          <div class="mini-meter__rest" style="width: {{ 100 - pct_recu }}%;"></div>
+        <div class="mini-bar">
+          <div class="mini-segment mini-segment--accent" style="width: {{ pct_recu }}%;"></div>
+          <div class="mini-segment mini-segment--soft" style="width: {{ 100 - pct_recu }}%;"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="card section-card cta-section">
-    <div class="section-head">
-      <h2 class="section-title">Accès aux détails</h2>
-      <span class="section-tag">Aller plus loin</span>
-    </div>
+  <section class="card budget-section cta-section">
+    <h2 class="section-title">Accès aux détails</h2>
     <div class="cta-row">
       <a class="btn btn-sm btn-outline-primary" href="{{ url_for('projets.projet_budget_charges', projet_id=projet.id) }}">Voir les charges</a>
       <a class="btn btn-sm btn-outline-primary" href="{{ url_for('projets.projet_budget_produits', projet_id=projet.id) }}">Voir les produits</a>
@@ -193,7 +156,7 @@
     </div>
   </section>
 
-  <section class="card section-card synthesis-sentence">
+  <section class="card budget-section synthesis-sentence">
     <p>
       Le projet est actuellement <strong>{{ statut_phrase }}</strong>,
       et {{ "%.0f"|format(pct_non_finance) }} % du budget reste à financer
