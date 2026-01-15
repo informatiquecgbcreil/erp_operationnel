@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+  <h1>👥 Attribution des rôles</h1>
+  <p style="opacity:.8;">Tu changes le rôle et le secteur assigné à la volée. (Effet immédiat.)</p>
+
+  <table class="table" style="width:100%;">
+    <thead>
+      <tr>
+        <th>Utilisateur</th>
+        <th>Rôle</th>
+        <th>Secteur assigné</th>
+        <th style="width:320px;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td>
+          <b>{{ u.nom }}</b><br>
+          <span style="opacity:.75;">{{ u.email }}</span>
+        </td>
+        <td>{{ u.role_codes|join(', ') }}</td>
+        <td>{{ u.secteur_assigne or "" }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.rbac_user_set_role', user_id=u.id) }}" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select class="input" name="role" style="min-width:180px;">
+              <option value="">(inchangé)</option>
+              {% for r in roles %}
+                <option value="{{ r.name }}">{{ r.name }}</option>
+              {% endfor %}
+            </select>
+
+            <input class="input" name="secteur_assigne" placeholder="secteur (optionnel)" value="{{ u.secteur_assigne or '' }}" style="min-width:180px;">
+            <button class="btn" type="submit">Appliquer</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="margin-top:14px;">
+    <a class="btn" href="{{ url_for('admin.rbac_roles') }}">Gérer les rôles</a>
+  </div>
+</div>
+{% endblock %}

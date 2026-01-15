@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="card">
+    <div class="inline" style="justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h1>Participants — {{ secteur }}</h1>
+        <p class="muted">Gestion des participants ayant au moins une présence dans ce secteur. L’anonymisation conserve les stats mais efface les identifiants.</p>
+      </div>
+      <div>
+        <a class="btn" href="{{ url_for('activite.index') }}">⬅️ Retour Ateliers</a>
+      </div>
+    </div>
+
+    <form method="get" style="margin-top:12px;">
+      <div class="inline" style="gap:10px; flex-wrap:wrap;">
+        <input class="in" name="q" placeholder="Rechercher (nom, prénom, mail, tel)" value="{{ q }}" style="min-width:260px;">
+        <button class="btn" type="submit">Rechercher</button>
+        {% if q %}<a class="btn" href="{{ url_for('activite.participants') }}">Réinitialiser</a>{% endif %}
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Contact</th>
+            <th>Profil</th>
+            <th>Visites (secteur)</th>
+            <th>Dernière</th>
+            <th style="width:280px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in participants %}
+            {% set st = stats_map.get(p.id, {}) %}
+            <tr>
+              <td><strong>{{ p.prenom }} {{ p.nom }}</strong><div class="muted" style="font-size:12px;">#{{ p.id }}</div></td>
+              <td class="muted">{{ p.email or "—" }}<br>{{ p.telephone or "—" }}</td>
+              <td class="muted">
+                {{ p.type_public or "—" }} · {{ p.genre or "—" }} ·
+                {% if p.date_naissance %}{{ p.date_naissance.strftime('%d/%m/%Y') }}{% else %}—{% endif %}
+                <br>
+                {% if p.quartier %}{{ p.quartier.ville }} — {{ p.quartier.nom }}{% else %}Quartier : —{% endif %}
+              </td>
+              <td><span class="tag">{{ st.get('visites', 0) }}</span></td>
+              <td class="muted">{% if st.get('last_seen') %}{{ st.get('last_seen').strftime('%d/%m/%Y') }}{% else %}—{% endif %}</td>
+              <td>
+                <div class="inline" style="gap:8px; flex-wrap:wrap;">
+                  <a class="btn" href="{{ url_for('activite.participant_edit', participant_id=p.id) }}">✏️ Éditer</a>
+
+                  <form method="post" action="{{ url_for('activite.participant_anonymize', participant_id=p.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn" type="submit" onclick="return confirm('Anonymiser ce participant ? (conserve les stats, efface les identifiants)');">🕶️ Anonymiser</button>
+                  </form>
+
+                  <form method="post" action="{{ url_for('activite.participant_delete', participant_id=p.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn danger" type="submit" onclick="return confirm('SUPPRESSION DÉFINITIVE ? (possible uniquement si ce participant n\'est pas utilisé dans d\'autres secteurs)');">🗑️ Supprimer</button>
+                  </form>
+
+                  {% if is_admin_global %}
+                  <form method="post" action="{{ url_for('activite.participant_anonymize', participant_id=p.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="strict" value="1">
+                    <button class="btn" type="submit" onclick="return confirm('Anonymisation stricte ? (efface aussi démographie)');">🧽 Stricte</button>
+                  </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+          {% if participants|length == 0 %}
+            <tr><td colspan="6" class="muted">Aucun participant trouvé.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

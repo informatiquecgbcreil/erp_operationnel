@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="stack">
+  <div class="card">
+    <div class="inline" style="justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h1 style="margin:0;">Bilans lourds</h1>
+        <p class="muted" style="margin:6px 0 0 0;">
+          Synthèse "grosse artillerie" (activité + présences + évaluations) filtrée par périmètre utilisateur.
+        </p>
+      </div>
+
+      <form method="get" action="{{ url_for('bilans.bilans_lourds') }}" class="inline" style="gap:8px;">
+        <label for="year" class="muted">Exercice</label>
+        <input id="year" name="year" type="number" min="2000" max="2100" value="{{ year }}" style="width:110px;">
+        <button class="btn" type="submit">Charger</button>
+        <a class="btn" href="{{ url_for('bilans.dashboard', year=year) }}">⬅ Retour</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>Activité</h3>
+      <div class="grid two">
+        <div>
+          <p class="muted">Ateliers (actifs)</p>
+          <h2>{{ stats.activite.nb_ateliers }}</h2>
+        </div>
+        <div>
+          <p class="muted">Sessions (réalisées)</p>
+          <h2>{{ stats.activite.nb_sessions }}</h2>
+        </div>
+        <div>
+          <p class="muted">Présences (émargements)</p>
+          <h2>{{ stats.activite.nb_presences }}</h2>
+        </div>
+        <div>
+          <p class="muted">Participants uniques</p>
+          <h2>{{ stats.activite.nb_participants_uniques }}</h2>
+        </div>
+      </div>
+      <hr>
+      <p class="muted" style="margin:0;">
+        Remplissage collectif: <strong>{{ stats.activite.taux_remplissage_collectif }}%</strong>
+        {% if stats.activite.total_places_collectif %}
+          ({{ stats.activite.nb_presences_collectif }} / {{ stats.activite.total_places_collectif }})
+        {% endif %}
+      </p>
+      <p class="muted" style="margin:6px 0 0 0;">
+        RDV (individuel): <strong>{{ stats.activite.nb_rdv }}</strong> — durée totale: <strong>{{ stats.activite.minutes_rdv }}</strong> min
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Évaluations</h3>
+      <div class="grid two">
+        <div>
+          <p class="muted">Total évaluations</p>
+          <h2>{{ stats.evaluations.total }}</h2>
+        </div>
+        <div>
+          <p class="muted">Compétences évaluées (uniques)</p>
+          <h2>{{ stats.evaluations.nb_competences_uniques }}</h2>
+        </div>
+      </div>
+      <hr>
+      <table class="table">
+        <thead><tr><th>État</th><th style="text-align:right;">Nb</th></tr></thead>
+        <tbody>
+          {% for label, nb in stats.evaluations.par_etat %}
+            <tr><td>{{ label }}</td><td style="text-align:right;">{{ nb }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Détail par secteur</h3>
+    <p class="muted">Si tu es en finance/direction : tu vois tout. Sinon : ton secteur uniquement.</p>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Secteur</th>
+          <th style="text-align:right;">Ateliers</th>
+          <th style="text-align:right;">Sessions</th>
+          <th style="text-align:right;">Présences</th>
+          <th style="text-align:right;">Participants uniques</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in stats.par_secteur %}
+          <tr>
+            <td>{{ row.secteur }}</td>
+            <td style="text-align:right;">{{ row.nb_ateliers }}</td>
+            <td style="text-align:right;">{{ row.nb_sessions }}</td>
+            <td style="text-align:right;">{{ row.nb_presences }}</td>
+            <td style="text-align:right;">{{ row.nb_participants_uniques }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

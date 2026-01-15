@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="inline">
+    <h1 style="margin:0">Participants</h1>
+    <a class="btn ok" href="{{ url_for('participants.new_participant') }}">➕ Nouveau participant</a>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Recherche</h2>
+
+    <form class="inline" method="get" action="{{ url_for('participants.list_participants') }}" style="gap:8px; flex-wrap:wrap">
+      <input class="in" style="max-width:320px" type="text" name="q"
+             placeholder="Nom, prénom, email, téléphone" value="{{ q }}">
+
+      {% if not can('participants:view_all') %}
+        <select name="scope" class="in" style="max-width:280px">
+          <!-- par défaut, scope est vide => comportement 'secteur' -->
+          <option value="" {% if not scope or scope=='secteur' %}selected{% endif %}>
+            Dans mon secteur (créés + déjà vus)
+          </option>
+
+          <option value="created" {% if scope=='created' %}selected{% endif %}>
+            Créés par mon secteur (y compris jamais venus)
+          </option>
+
+          <option value="annuaire" {% if scope=='annuaire' %}selected{% endif %}>
+            Annuaire global (recherche)
+          </option>
+        </select>
+      {% else %}
+        <select name="scope" class="in" style="max-width:220px">
+          <option value="" {% if not scope %}selected{% endif %}>Tous</option>
+          <option value="secteur" {% if scope=='secteur' %}selected{% endif %}>Filtrer par secteur</option>
+        </select>
+        <input class="in" style="max-width:220px" type="text" name="secteur" placeholder="Secteur"
+               value="{{ request.args.get('secteur','') }}">
+      {% endif %}
+
+      <button class="btn" type="submit">Rechercher</button>
+      <a class="btn" href="{{ url_for('participants.list_participants') }}">Reset</a>
+    </form>
+
+    {% if not can('participants:view_all') and scope == 'annuaire' %}
+      <div class="muted" style="margin-top:8px; font-size:12px">
+        ⚠️ L’annuaire global s’affiche uniquement avec une recherche (au moins 2 caractères).
+        Sans recherche, la page revient automatiquement au mode “Dans mon secteur”.
+      </div>
+    {% endif %}
+
+    <div class="tablewrap" style="margin-top:12px">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Contact</th>
+            <th>Profil</th>
+            <th>Créé pour</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in items %}
+            <tr>
+              <td><strong>{{ p.nom }} {{ p.prenom }}</strong></td>
+
+              <td>
+                {% if p.email %}<div>{{ p.email }}</div>{% endif %}
+                {% if p.telephone %}<div class="muted" style="font-size:12px">{{ p.telephone }}</div>{% endif %}
+                {% if not p.email and not p.telephone %}<span class="muted">—</span>{% endif %}
+              </td>
+
+              <td>
+                <span class="badge">{{ p.type_public or 'H' }}</span>
+                {% if p.ville %}<span class="muted" style="margin-left:8px">{{ p.ville }}</span>{% endif %}
+              </td>
+
+              <td>{{ p.created_secteur or '—' }}</td>
+
+              <td style="text-align:right">
+                <a class="btn" href="{{ url_for('participants.edit_participant', participant_id=p.id) }}">Ouvrir</a>
+              </td>
+            </tr>
+          {% endfor %}
+
+          {% if not items %}
+            <tr><td colspan="5" class="muted">Aucun participant pour l’instant.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

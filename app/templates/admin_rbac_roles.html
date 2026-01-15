@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+    <h1 style="margin:0;">🎭 Rôles</h1>
+    <a class="btn" href="{{ url_for('admin.rbac_role_new') }}">+ Nouveau rôle</a>
+  </div>
+
+  <p style="opacity:.8; margin-top:8px;">
+    Chaque rôle contient une liste de permissions. Le rôle <b>admin_tech</b> a tout, et reste verrouillé.
+  </p>
+
+  <table class="table" style="width:100%;">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Label</th>
+        <th>Type</th>
+        <th>Permissions</th>
+        <th style="width:220px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in roles %}
+      <tr>
+        <td><b>{{ r.name }}</b></td>
+        <td>{{ r.label or "" }}</td>
+        <td>
+          {% if r.is_system %}<span class="badge">Système</span>{% else %}<span class="badge">Custom</span>{% endif %}
+        </td>
+        <td style="max-width:520px;">
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            {% for p in r.permissions %}
+              <span class="tag">{{ p.code }}</span>
+            {% endfor %}
+            {% if r.permissions|length == 0 %}
+              <i style="opacity:.7;">(aucune)</i>
+            {% endif %}
+          </div>
+        </td>
+        <td>
+          <a class="btn" href="{{ url_for('admin.rbac_role_edit', role_id=r.id) }}">Éditer</a>
+          {% if not r.is_system %}
+          <form method="post" action="{{ url_for('admin.rbac_role_delete', role_id=r.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger" type="submit" onclick="return confirm('Supprimer ce rôle ?')">Supprimer</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

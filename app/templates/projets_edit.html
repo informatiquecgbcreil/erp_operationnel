@@ -1,0 +1,352 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+
+  <div class="card">
+    <div class="inline" style="justify-content:space-between;">
+      <div>
+        <h1>Projet</h1>
+      <form method="post" action="{{ url_for('projets.projets_delete', projet_id=projet.id) }}" style="margin-left:auto;" onsubmit="return confirm('Supprimer ce projet définitivement ? (irréversible)');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn danger" type="submit">Supprimer</button>
+      </form>
+        <p><strong>{{ projet.nom }}</strong> · {{ projet.secteur }}</p>
+      </div>
+      <div class="inline">
+        <a class="btn" href="{{ url_for('projets.projets_list') }}">Retour</a>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="kpi">
+      <div class="box"><div class="muted">Demandé</div><div class="v">{{ "%.2f"|format(projet.total_demande or 0) }}€</div></div>
+      <div class="box"><div class="muted">Attribué</div><div class="v">{{ "%.2f"|format(projet.total_attribue or 0) }}€</div></div>
+      <div class="box"><div class="muted">Reçu</div><div class="v">{{ "%.2f"|format(projet.total_recu or 0) }}€</div></div>
+      <div class="box"><div class="muted">Lignes réel</div><div class="v">{{ "%.2f"|format(projet.total_reel_lignes or 0) }}€</div></div>
+      <div class="box"><div class="muted">Engagé</div><div class="v">{{ "%.2f"|format(projet.total_engage or 0) }}€</div></div>
+      <div class="box"><div class="muted">Reste</div><div class="v">{{ "%.2f"|format(projet.total_reste or 0) }}€</div></div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>Infos projet</h2>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="update">
+
+        <div class="row">
+          <div>
+            <label>Nom</label>
+            <input name="nom" value="{{ projet.nom }}" required>
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea name="description" rows="7">{{ projet.description or "" }}</textarea>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+        <button class="btn ok" type="submit">Enregistrer</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Compte-rendu (CR)</h2>
+      <p class="muted">Formats : pdf / doc / docx / odt</p>
+
+      {% if projet.cr_filename %}
+        <div class="flash success">
+          CR présent : <strong>{{ projet.cr_original_name or projet.cr_filename }}</strong>
+          <div class="spacer"></div>
+          <a class="btn" href="{{ url_for('projets.projets_cr_download', projet_id=projet.id) }}">Télécharger</a>
+        </div>
+        <div class="spacer"></div>
+      {% else %}
+        <div class="flash warning">Aucun CR pour l’instant.</div>
+        <div class="spacer"></div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="upload_cr">
+        <input type="file" name="cr_file" required>
+        <div class="spacer"></div>
+        <button class="btn ok" type="submit">Uploader</button>
+      </form>
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <h2>Budget AAP (charges / produits / ventilation)</h2>
+    <div class="row three">
+      <div><strong>Charges</strong><br>{{ "%.2f"|format(projet.total_charges_previsionnel or 0) }}€</div>
+      <div><strong>Produits demandés</strong><br>{{ "%.2f"|format(projet.total_produits_demandes or 0) }}€</div>
+      <div><strong>Produits accordés</strong><br>{{ "%.2f"|format(projet.total_produits_accordes or 0) }}€</div>
+      <div><strong>Reste à financer</strong><br>{{ "%.2f"|format(projet.reste_a_financer or 0) }}€</div>
+    </div>
+    <div class="spacer"></div>
+    <a class="btn ok" href="{{ url_for('projets.projet_budget_home', projet_id=projet.id) }}">Ouvrir le budget AAP</a>
+    <p class="muted">Nouveau modèle : charges/prod + ventilation (et les dépenses restent disponibles pour le suivi d’engagement).</p>
+  </div>
+
+<div class="card">
+    <h2>Lier des subventions</h2>
+    <p class="muted">Uniquement des subventions du même secteur.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Année</th>
+            <th>Subvention</th>
+            <th>Reçu</th>
+            <th>Engagé</th>
+            <th>Reste</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in subs %}
+            <tr>
+              <td>{{ s.annee_exercice }}</td>
+              <td><strong>{{ s.nom }}</strong></td>
+              <td>{{ "%.2f"|format(s.montant_recu or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.total_engage or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.total_reste or 0) }}€</td>
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="toggle_subvention">
+                  <input type="hidden" name="subvention_id" value="{{ s.id }}">
+                  {% if s.id in linked %}
+                    <button class="btn warn" type="submit">Délier</button>
+                  {% else %}
+                    <button class="btn ok" type="submit">Lier</button>
+                  {% endif %}
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+          {% if subs|length == 0 %}
+            <tr><td colspan="6" class="muted">Aucune subvention disponible pour ce secteur.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  
+
+  <div class="card">
+    <h2>Objectifs généraux</h2>
+    <p class="muted">Les objectifs généraux du projet se gèrent dans le module pédagogique.</p>
+    <a class="btn ok" href="{{ url_for('pedagogie.objectifs', projet_id=projet.id) }}">Configurer les objectifs</a>
+  </div>
+
+<div class="grid two">
+  <div class="card">
+    <h2>Lier des ateliers (pour les stats participants)</h2>
+    <p class="muted">Ce lien sert aux indicateurs du projet. Un atelier peut être rattaché à plusieurs projets si besoin (ex : cofinancements).</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Atelier</th>
+            <th>Type</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in ateliers %}
+            <tr>
+              <td><strong>{{ a.nom }}</strong></td>
+              <td><span class="badge">{{ a.type_atelier }}</span></td>
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="toggle_atelier">
+                  <input type="hidden" name="atelier_id" value="{{ a.id }}">
+                  {% if a.id in linked_ateliers %}
+                    <button class="btn warn" type="submit">Délier</button>
+                  {% else %}
+                    <button class="btn ok" type="submit">Lier</button>
+                  {% endif %}
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+          {% if ateliers|length == 0 %}
+            <tr><td colspan="3" class="muted">Aucun atelier disponible pour ce secteur.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Indicateurs du projet</h2>
+    <p class="muted">Ajoute les indicateurs que tu veux voir apparaître automatiquement dans les stats.</p>
+
+    <div class="spacer"></div>
+    <div class="card" style="background:rgba(0,0,0,0.03); border:1px dashed rgba(0,0,0,0.15)">
+      <h3 style="margin-top:0">Assistant (packs)</h3>
+      <p class="muted" style="margin-top:-6px">Pour aller vite : ajoute un groupe d’indicateurs “prêts à l’emploi”.</p>
+      <form method="POST" class="inline" style="gap:8px; flex-wrap:wrap">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="add_pack">
+        <select name="pack" class="in" style="max-width:320px" required>
+          <option value="">Choisir un pack…</option>
+          {% for k,v in indicator_packs.items() %}
+            <option value="{{ k }}">{{ v.label }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn ok" type="submit">Ajouter le pack</button>
+      </form>
+    </div>
+
+
+    <form method="POST" class="inline" style="gap:8px; flex-wrap:wrap">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="add_indicateur">
+      <select name="code" class="in" style="max-width:340px" required>
+        <option value="">Choisir un indicateur…</option>
+        {% for code,label in indicator_templates.items() %}
+          <option value="{{ code }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+      <input class="in" style="max-width:280px" type="text" name="label" placeholder="Libellé (optionnel)">
+      <button class="btn ok" type="submit">Ajouter</button>
+    </form>
+
+    <div class="spacer"></div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:220px">Indicateur</th>
+            <th style="min-width:220px">Réglages</th>
+            <th style="min-width:160px">Objectif</th>
+            <th style="min-width:200px">Périmètre</th>
+            <th>Actif</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ind in indicateurs %}
+            {% set params = ind.params() %}
+            <tr>
+              <td>
+                <div style="display:flex; flex-direction:column; gap:4px">
+                  <strong>{{ ind.label }}</strong>
+                  <span class="muted" style="font-size:12px">{{ ind.code }}</span>
+                </div>
+              </td>
+
+              <td>
+                <form method="POST" class="inline" style="gap:6px; flex-wrap:wrap">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="save_indicateur">
+                  <input type="hidden" name="indicateur_id" value="{{ ind.id }}">
+
+                  <select name="period" class="in" style="max-width:220px">
+                    {% set pval = params.get('period','context') %}
+                    {% for k,v in period_choices.items() %}
+                      <option value="{{ k }}" {% if k==pval %}selected{% endif %}>{{ v }}</option>
+                    {% endfor %}
+                  </select>
+
+                  <input class="in" type="date" name="start" value="{{ params.get('start','') }}" title="Début (si personnalisée)">
+                  <input class="in" type="date" name="end" value="{{ params.get('end','') }}" title="Fin (si personnalisée)">
+
+                  <input class="in" style="max-width:220px" type="text" name="label" placeholder="Renommer (optionnel)">
+                  <button class="btn ok" type="submit">Enregistrer</button>
+                </form>
+              </td>
+
+              <td>
+                <form method="POST" class="inline" style="gap:6px; flex-wrap:wrap">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="save_indicateur">
+                  <input type="hidden" name="indicateur_id" value="{{ ind.id }}">
+                  <input type="hidden" name="period" value="{{ params.get('period','context') }}">
+                  <input type="hidden" name="start" value="{{ params.get('start','') }}">
+                  <input type="hidden" name="end" value="{{ params.get('end','') }}">
+                  <input class="in" style="max-width:120px" type="text" name="target" placeholder="ex: 80" value="{{ params.get('target','') }}">
+                  <select name="target_op" class="in" style="max-width:200px">
+                    {% set op = params.get('target_op','ge') %}
+                    {% for k,v in target_op_choices.items() %}
+                      <option value="{{ k }}" {% if k==op %}selected{% endif %}>{{ v }}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn ok" type="submit">OK</button>
+                </form>
+              </td>
+
+              <td>
+                <form method="POST" class="inline" style="gap:6px; flex-wrap:wrap">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="save_indicateur">
+                  <input type="hidden" name="indicateur_id" value="{{ ind.id }}">
+                  <input type="hidden" name="period" value="{{ params.get('period','context') }}">
+                  <input type="hidden" name="start" value="{{ params.get('start','') }}">
+                  <input type="hidden" name="end" value="{{ params.get('end','') }}">
+                  <input type="hidden" name="target" value="{{ params.get('target','') }}">
+                  <input type="hidden" name="target_op" value="{{ params.get('target_op','ge') }}">
+                  <select name="atelier_id" class="in" style="max-width:220px">
+                    <option value="">Tous les ateliers liés</option>
+                    {% for a in ateliers %}
+                      {% if a.id in linked_ateliers %}
+                        <option value="{{ a.id }}" {% if params.get('atelier_id') and (params.get('atelier_id')|int)==a.id %}selected{% endif %}>{{ a.nom }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                  <button class="btn ok" type="submit">OK</button>
+                </form>
+                <div class="muted" style="font-size:12px; margin-top:6px">
+                  (s’applique surtout aux indicateurs “participants”)
+                </div>
+              </td>
+
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="toggle_indicateur">
+                  <input type="hidden" name="indicateur_id" value="{{ ind.id }}">
+                  {% if ind.is_active %}
+                    <button class="btn ok" type="submit">Oui</button>
+                  {% else %}
+                    <button class="btn warn" type="submit">Non</button>
+                  {% endif %}
+                </form>
+              </td>
+
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="delete_indicateur">
+                  <input type="hidden" name="indicateur_id" value="{{ ind.id }}">
+                  <button class="btn" type="submit">Supprimer</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+          {% if indicateurs|length == 0 %}
+            <tr><td colspan="4" class="muted">Aucun indicateur pour l’instant.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spacer"></div>
+    <p class="muted" style="font-size:12px">Astuce : les indicateurs basés sur les participants nécessitent d’avoir lié au moins un atelier au projet.</p>
+  </div>
+</div>
+</div>
+
+</div>
+
+{% endblock %}

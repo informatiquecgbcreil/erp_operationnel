@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ title or 'Kiosque émargement' }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="stack" style="max-width:980px; margin:0 auto; padding:16px;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="stack">
+          {% for cat, msg in messages %}
+            <div class="card" style="border-left:6px solid var(--border);">
+              <div class="muted" style="text-transform:uppercase; letter-spacing:.06em; font-size:12px;">{{ cat }}</div>
+              <div>{{ msg }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block body %}{% endblock %}
+
+    <div class="muted" style="text-align:center; padding:12px 0;">
+      Kiosque d’émargement · Centre Social
+    </div>
+  </div>
+</body>
+</html>

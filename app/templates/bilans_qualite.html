@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  {% if forbidden %}
+    <div class="card">
+      <h1>Bilans & Stats · Qualité de gestion</h1>
+      <p class="muted">Accès réservé aux rôles finance/direction/responsable de secteur.</p>
+    </div>
+  {% else %}
+    <div class="stack">
+      <div class="card">
+        <div class="inline" style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          <div>
+            <div class="inline" style="gap:12px; flex-wrap:wrap; align-items:baseline;">
+              <h1 style="margin:0;">Qualité de gestion</h1>
+              <form method="get" action="{{ url_for('bilans.qualite') }}" class="inline" style="gap:8px;">
+                <label for="year" class="muted">Exercice</label>
+                <select id="year" name="year" onchange="this.form.submit()">
+                  {% for y in years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                  {% endfor %}
+                </select>
+                <noscript><button class="btn" type="submit">OK</button></noscript>
+              </form>
+            </div>
+            <p class="muted">
+              Indicateurs d'aide (non bloquants) pour garder un suivi propre sans se faire mal au cerveau.
+            </p>
+          </div>
+          <div class="inline" style="gap:8px; flex-wrap:wrap;">
+            <a class="btn" href="{{ url_for('bilans.dashboard', year=year) }}">← Dashboard</a>
+            <a class="btn" href="{{ url_for('bilans.bilan_secteur', year=year) }}">📊 Bilan par secteur</a>
+            <a class="btn" href="{{ url_for('bilans.bilan_subvention', year=year) }}">🧾 Bilan par subvention</a>
+            <a class="btn" href="{{ url_for('bilans.inventaire', year=year) }}">📦 Inventaire</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <h3>Lignes “à ventiler”</h3>
+          <h2>{{ data.a_ventiler.nb }}</h2>
+          <p class="muted">Montant : <strong>{{ '%.2f'|format(data.a_ventiler.montant) }} €</strong></p>
+          <p class="muted">Âge moyen : <strong>{{ data.a_ventiler.age_moyen_jours }} jours</strong></p>
+        </div>
+        <div class="card">
+          <h3>Dépenses hors subvention</h3>
+          <h2>{{ data.hors_subvention.nb }}</h2>
+          <p class="muted">Montant : <strong>{{ '%.2f'|format(data.hors_subvention.montant) }} €</strong></p>
+          <p class="muted">(Fonds propres / autres cas “terrain”.)</p>
+        </div>
+        <div class="card">
+          <h3>Factures sans inventaire lié</h3>
+          <h2>{{ data.factures.sans_inventaire }}</h2>
+          <p class="muted">Simple rappel : utile si tu veux tracer le patrimoine.</p>
+        </div>
+        <div class="card">
+          <h3>Conseils rapides</h3>
+          <ul>
+            <li>Si “à ventiler” monte : tu perds en lisibilité (pas grave, mais ça finit par piquer).</li>
+            <li>Si “hors subvention” monte : pense à noter l'origine (fonds propres / don / reliquat).</li>
+            <li>Si factures sans inventaire : pas un drame, mais tu perds la traçabilité matériel.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

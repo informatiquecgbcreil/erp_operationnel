@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>App Gestion</title>
+
+  <!-- (Optionnel) ton CSS externe si tu veux ajouter des trucs plus tard -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <style>
+    /* =========================================================
+      THEME SYSTEM
+      - default: dark
+      - finance light: data-theme="light"
+    ========================================================= */
+
+    :root{
+      color-scheme: light dark;
+
+      /* DARK (par défaut) */
+      --bg: #0b1020;
+      --bg-grad-1: #070b16;
+      --bg-grad-2: #0b1020;
+
+      --surface: rgba(18,26,51,.78);
+      --surface-strong: #121a33;
+      --surface-soft: rgba(255,255,255,.04);
+
+      --text: #e8ecff;
+      --muted: #9aa6d6;
+
+      --border: rgba(255,255,255,.10);
+      --border-soft: rgba(255,255,255,.12);
+      --border-hard: rgba(255,255,255,.18);
+
+      --accent: #6aa5ff;
+      --danger: #ff6a6a;
+      --ok: #52d17c;
+      --warn: #ffcc66;
+
+      --shadow: 0 10px 30px rgba(0,0,0,.25);
+
+      --input-bg: rgba(255,255,255,.05);
+      --input-text: var(--text);
+      --input-border: var(--border-soft);
+
+      --option-bg: var(--surface-strong);
+      --option-text: var(--text);
+
+      --focus: rgba(106,165,255,.35);
+    }
+
+    /* THEME CLAIR “FINANCE” */
+    html[data-theme="light"]{
+      color-scheme: light;
+
+      --bg: #f4f6fb;
+      --bg-grad-1: #ffffff;
+      --bg-grad-2: #eef2ff;
+
+      --surface: #ffffff;
+      --surface-strong: #ffffff;
+      --surface-soft: #f6f8ff;
+
+      --text: #0f172a;
+      --muted: #475569;
+
+      --border: rgba(15,23,42,.12);
+      --border-soft: rgba(15,23,42,.16);
+      --border-hard: rgba(15,23,42,.22);
+
+      /* Accent plus “pro finance” (bleu bureau) */
+      --accent: #1d4ed8;
+      --danger: #dc2626;
+      --ok: #16a34a;
+      --warn: #d97706;
+
+      --shadow: 0 10px 26px rgba(2,6,23,.08);
+
+      --input-bg: #ffffff;
+      --input-text: var(--text);
+      --input-border: rgba(15,23,42,.20);
+
+      --option-bg: #ffffff;
+      --option-text: var(--text);
+
+      --focus: rgba(29,78,216,.18);
+    }
+
+    /* =========================================================
+      BASE
+    ========================================================= */
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: system-ui, "Segoe UI", Roboto, Arial;
+      background: linear-gradient(180deg, var(--bg-grad-1), var(--bg-grad-2));
+      color: var(--text);
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    a:hover{ text-decoration: underline; }
+
+    code{ color: var(--text); }
+
+    .wrap{ max-width:1180px; margin:0 auto; padding:14px 16px; }
+    .container{ max-width:1180px; margin:0 auto; padding:18px 16px 46px; }
+
+    /* =========================================================
+      TOP BAR / NAV
+    ========================================================= */
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid color-mix(in srgb, var(--border) 85%, transparent);
+    }
+
+    .nav{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .brand{ font-weight:900; letter-spacing:.3px; margin-right:10px; }
+
+    .pill{
+      padding:8px 12px;
+      border:1px solid var(--border-soft);
+      border-radius:999px;
+      background: color-mix(in srgb, var(--surface) 70%, transparent);
+      cursor:pointer;
+      user-select:none;
+      transition:border-color .15s ease, background .15s ease;
+    }
+
+    .pill:hover{ border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+    .pill.active{
+      border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    }
+
+    .right{ margin-left:auto; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+    .tag{
+      font-size:12px; color: var(--muted);
+      border:1px dashed color-mix(in srgb, var(--border-hard) 70%, transparent);
+      padding:6px 10px; border-radius:999px;
+      background: color-mix(in srgb, var(--surface) 78%, transparent);
+    }
+
+    /* =========================================================
+      CARDS / GRIDS
+    ========================================================= */
+    .card{
+      background: var(--surface);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Dark: surface légèrement translucide */
+    html[data-theme="dark"] .card{
+      background: var(--surface);
+    }
+
+    .stack{ display:flex; flex-direction:column; gap:14px; }
+    .grid{ display:grid; gap:14px; }
+    .grid.two{ grid-template-columns:1fr; }
+    @media (min-width: 980px){
+      .grid.two{ grid-template-columns:1fr 1fr; }
+    }
+
+    h1{ margin:0 0 10px; font-size:28px; }
+    h2{ margin:0 0 10px; font-size:20px; }
+    h3{ margin:0 0 10px; font-size:16px; color:var(--muted); font-weight:700; }
+    p{ margin:6px 0; color:var(--muted); }
+
+    .muted{ color: var(--muted); }
+    .spacer{ height:12px; }
+    .inline{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+    /* =========================================================
+      BUTTONS
+    ========================================================= */
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--border-soft);
+      background: color-mix(in srgb, var(--surface) 78%, transparent);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      display:inline-block;
+    }
+    .btn:hover{ border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+
+    .btn.danger{ border-color: color-mix(in srgb, var(--danger) 60%, var(--border)); }
+    .btn.ok{ border-color: color-mix(in srgb, var(--ok) 60%, var(--border)); }
+    .btn.warn{ border-color: color-mix(in srgb, var(--warn) 60%, var(--border)); }
+
+    /* =========================================================
+      FORMS (inputs/selects/textarea)
+    ========================================================= */
+    input, select, textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--input-text);
+      outline:none;
+    }
+
+    /* ✅ FIX dropdowns */
+    select option,
+    select optgroup{
+      background: var(--option-bg) !important;
+      color: var(--option-text) !important;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+
+    label{ font-size:13px; color:var(--muted); display:block; margin-bottom:6px; }
+    .help{ color:var(--muted); font-size:12px; margin-top:4px; }
+
+    .row{ display:grid; gap:10px; grid-template-columns:1fr; }
+    .row.two{ grid-template-columns:1fr; }
+    .row.three{ grid-template-columns:1fr; }
+    @media (min-width: 980px){
+      .row.two{ grid-template-columns:1fr 1fr; }
+      .row.three{ grid-template-columns:1fr 1fr 1fr; }
+    }
+
+    /* =========================================================
+      FLASH
+    ========================================================= */
+    .flash{ border-radius:12px; padding:10px 12px; border:1px solid var(--border); background: var(--surface-soft); }
+    .flash.success{ border-color: color-mix(in srgb, var(--ok) 60%, var(--border)); }
+    .flash.danger{ border-color: color-mix(in srgb, var(--danger) 60%, var(--border)); }
+    .flash.warning{ border-color: color-mix(in srgb, var(--warn) 60%, var(--border)); }
+
+    /* =========================================================
+      KPI
+    ========================================================= */
+    .kpi{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    @media (min-width: 980px){
+      .kpi{ grid-template-columns:repeat(6, minmax(0,1fr)); }
+    }
+    .kpi .box{
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: var(--surface-soft);
+      min-height:70px;
+    }
+    .kpi .v{ font-weight:900; font-size:18px; margin-top:4px; }
+
+    /* =========================================================
+      TABLES
+    ========================================================= */
+    .tablewrap{
+      width:100%;
+      overflow:auto;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: var(--surface);
+    }
+    table{ width:100%; border-collapse:collapse; min-width:760px; }
+    th, td{ padding:10px 10px; border-bottom:1px solid color-mix(in srgb, var(--border) 90%, transparent); vertical-align:top; }
+    th{
+      text-align:left;
+      color: var(--muted);
+      font-weight:700;
+      font-size:13px;
+      background: var(--surface-soft);
+    }
+    thead th{ position:sticky; top:0; z-index:1; }
+
+    /* Inputs */
+    .in{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      outline:none;
+    }
+    textarea.in{ resize: vertical; }
+    label{ display:block; margin:6px 0 6px; font-weight:700; color: var(--muted); font-size:13px; }
+
+    /* =========================================================
+      THEME BUTTON (petit polish)
+    ========================================================= */
+    #themeToggle{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:44px;
+      font-weight:700;
+    }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+
+  <body>
+  {% set ep = request.endpoint or '' %}
+  {% set embed = request.args.get('embed') %}
+  {% if not embed %}
+  <div class="topbar">
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand">App Gestion</div>
+
+        {% if current_user.is_authenticated %}
+          {% if can('dashboard:view') %}
+            <a class="pill {% if ep.startswith('main.dashboard') %}active{% endif %}" href="{{ url_for('main.dashboard') }}">Dashboard 📊</a>
+          {% endif %}
+          {% if can('subventions:view') %}
+            <a class="pill {% if ep.startswith('main.subventions') %}active{% endif %}" href="{{ url_for('main.subventions_list') }}">Subventions 💶</a>
+          {% endif %}
+          {% if can('depenses:create') %}
+            <a class="pill {% if ep.startswith('budget.depense_new') %}active{% endif %}" href="{{ url_for('budget.depense_new') }}">Nouvelle dépense ➕💸</a>
+          {% endif %}
+          {% if can('depenses:view') %}
+            <a class="pill {% if ep.startswith('budget.depenses_list') %}active{% endif %}" href="{{ url_for('budget.depenses_list') }}">Dépenses 💸</a>
+          {% endif %}
+          {% if can('projets:view') %}
+            <a class="pill {% if ep.startswith('projets.') %}active{% endif %}" href="{{ url_for('projets.projets_list') }}">Projets 🗂️</a>
+          {% endif %}
+          {% if can('participants:view') or can('participants:view_all') %}
+            <a class="pill {% if ep.startswith('participants.') %}active{% endif %}" href="{{ url_for('participants.list_participants') }}">Participants 👥</a>
+          {% endif %}
+          {% if can('inventaire:view') %}
+            <a class="pill {% if ep.startswith('inventaire_materiel.') %}active{% endif %}" href="{{ url_for('inventaire_materiel.list_items') }}">Inventaire 📦</a>
+          {% endif %}
+          {% if can('ateliers:view') %}
+            <a class="pill {% if ep.startswith('activite.') or ep.startswith('kiosk.') %}active{% endif %}" href="{{ url_for('activite.index') }}">Émargement ✍️</a>
+          {% endif %}
+          {% if can('pedagogie:view') %}
+            <a class="pill" href="{{ url_for('pedagogie.referentiels_list') }}">Pédagogie (Config) ⚙️📘</a>
+            <a class="pill" href="{{ url_for('pedagogie.suivi_pedagogique') }}">Suivi Pédagogique 📈🎓</a>
+          {% endif %}
+          {% if can('bilans:view') %}
+            <a class="pill" href="{{ url_for('bilans.bilans_lourds', year=2026) }}">Bilans lourds 🧠</a>
+            <a class="pill {% if ep.startswith('main.stats_bilans') or ep.startswith('main.bilan_global') or ep.startswith('main.stats') %}active{% endif %}" href="{{ url_for('main.stats_bilans') }}">Stats &amp; bilans 🧠📊</a>
+          {% endif %}
+          {% if can('statsimpact:view') or can('statsimpact:view_all') %}
+            <a class="pill {% if ep.startswith('statsimpact.') %}active{% endif %}" href="{{ url_for('statsimpact.dashboard') }}">Données ateliers 🛠️📋</a>
+          {% endif %}
+          {% if can('controle:view') %}
+            <a class="pill {% if ep.startswith('main.controle') %}active{% endif %}" href="{{ url_for('main.controle') }}">Contrôle</a>
+          {% endif %}
+          {% if can('admin:users') %}
+            <a class="pill {% if ep.startswith('admin.users') %}active{% endif %}" href="{{ url_for('admin.users') }}">Équipe</a>
+          {% endif %}
+
+          <div class="right">
+            <div class="pill" id="themeToggle" title="Changer de thème">🌙</div>
+
+            <div class="tag">
+              {{ current_user.nom }} · {{ current_user.role_codes|join(', ') }}
+              {% if current_user.secteur_assigne %} · {{ current_user.secteur_assigne }}{% endif %}
+            </div>
+
+            <form method="post" action="{{ url_for('auth.logout') }}" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="pill" type="submit">Déconnexion</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="stack">
+          {% for category, msg in messages %}
+            <div class="flash {{ category }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+        <div class="spacer"></div>
+      {% endif %}
+    {% endwith %}
+
+    {% block body %}{% endblock %}
+  </div>
+
+  <script>
+  (function(){
+    const root = document.documentElement;
+    const btn  = document.getElementById("themeToggle");
+    if(!btn) return;
+
+    function apply(theme){
+      root.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+      btn.textContent = theme === "dark" ? "🌙" : "☀️";
+      btn.title = theme === "dark" ? "Passer en thème clair (finance)" : "Passer en thème sombre";
+    }
+
+    const saved = localStorage.getItem("theme");
+    if(saved){
+      apply(saved);
+    }else{
+      // thème par défaut : clair pour une lecture financière plus lisible
+      apply("light");
+    }
+
+    btn.addEventListener("click", ()=>{
+      const current = root.getAttribute("data-theme") || "dark";
+      apply(current === "dark" ? "light" : "dark");
+    });
+  })();
+  </script>
+  {% block scripts_extra %}{% endblock %}
+</body>
+</html>

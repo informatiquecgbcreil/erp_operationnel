@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <div class="stack">
+    <div class="card">
+      <h1 style="margin-top:0;">
+        {% if atelier %}Paramètres atelier{% else %}Nouvel atelier{% endif %}
+      </h1>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label>Nom</label>
+            <input class="in" type="text" name="nom" value="{{ atelier.nom if atelier else '' }}" required>
+          </div>
+          <div>
+            <label>Type</label>
+            <select class="in" name="type_atelier">
+              <option value="COLLECTIF" {% if atelier and atelier.type_atelier=='COLLECTIF' %}selected{% endif %}>Collectif</option>
+              <option value="INDIVIDUEL_MENSUEL" {% if atelier and atelier.type_atelier=='INDIVIDUEL_MENSUEL' %}selected{% endif %}>Individuel (feuille mensuelle)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <label>Description</label>
+        <textarea class="in" name="description" rows="3">{{ atelier.description if atelier else '' }}</textarea>
+
+        <div class="spacer"></div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div>
+            <label>Durée par défaut (min)</label>
+            <input class="in" type="number" name="duree_defaut_minutes" value="{{ atelier.duree_defaut_minutes if atelier else '' }}" min="0">
+          </div>
+          <div>
+            <label>Capacité défaut (collectif)</label>
+            {# Default hint: in Numérique, collective workshops are typically 12 places #}
+            <input class="in" type="number" name="capacite_defaut" value="{{ atelier.capacite_defaut if atelier else (12 if secteur in ['Numérique','Numerique'] else '') }}" min="0">
+            <div class="muted">Utilisé pour pré-remplir les sessions collectives (override possible par session).</div>
+          </div>
+          <div>
+            <label>Heures dispo/mois (individuel)</label>
+            <input class="in" type="number" step="0.25" name="heures_dispo_defaut_mois" value="{{ atelier.heures_dispo_defaut_mois if atelier else '' }}" min="0">
+            <div class="muted">Capacité de service mensuelle. Snapshot par mois au 1er RDV.</div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <label>Motifs (liste déroulante) · sépare par « ; »</label>
+        <input class="in" type="text" name="motifs" value="{{ motifs_str if motifs_str is defined else '' }}" placeholder="CAF; FranceConnect; Impôts; CV">
+        <div class="muted">Le champ « Autre » restera disponible à côté.</div>
+
+        <div class="row" style="gap:10px; flex-wrap:wrap;">
+          <button class="btn" type="submit">Enregistrer</button>
+          <a class="btn" href="{{ url_for('activite.index') }}">Retour</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

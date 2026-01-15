@@ -1,0 +1,190 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="card">
+    <h1>Nouvelle dépense</h1>
+    <p class="muted">Choix : subvention → compte → ligne → dépense. Justificatif non obligatoire pour le moment.</p>
+
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="row two">
+        <div>
+          <label>Subvention</label>
+          <select name="subvention_id" id="subSelect" required>
+            <option value="">-- choisir --</option>
+            {% for s in subs %}
+              <option value="{{ s.id }}">{{ s.annee_exercice }} · {{ s.secteur }} · {{ s.nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Compte</label>
+          <select name="compte" id="compteSelect" required>
+            <option value="">-- choisir --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="card" style="margin:0">
+        <h2 style="margin-top:0">📦 Inventaire (optionnel)</h2>
+        <label class="inline" style="gap:8px; align-items:center">
+          <input type="checkbox" name="create_inventory" value="1" id="createInv">
+          Ajouter une entrée dans l’inventaire en même temps que la dépense
+        </label>
+
+        <div id="invBlock" style="display:none; margin-top:12px">
+          <div class="row two">
+            <div><label>Désignation (par défaut = libellé)</label><input class="in" name="inv_designation"></div>
+            <div><label>Catégorie</label><input class="in" name="inv_categorie" placeholder="Informatique, Mobilier..."></div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <div class="row three">
+            <div><label>Quantité</label><input class="in" type="number" name="inv_quantite" min="1" value="1"></div>
+            <div><label>Valeur unitaire (€)</label><input class="in" type="number" step="0.01" name="inv_valeur_unitaire"></div>
+            <div>
+              <label>État</label>
+              <select class="in" name="inv_etat">
+                {% for v in ['OK','A réparer','HS','Donné'] %}
+                  <option value="{{ v }}">{{ v }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <div class="row two">
+            <div><label>Localisation</label><input class="in" name="inv_localisation" placeholder="Salle info, placard..."> </div>
+            <div><label>Numéro de série</label><input class="in" name="inv_numero_serie"></div>
+          </div>
+
+          <div class="spacer"></div>
+          <div><label>Notes</label><textarea class="in" name="inv_notes" rows="3"></textarea></div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="row two">
+        <div>
+          <label>Ligne</label>
+          <select name="ligne_budget_id" id="ligneSelect" required>
+            <option value="">-- choisir --</option>
+          </select>
+          <p class="muted" id="ligneInfo"></p>
+        </div>
+        <div>
+          <label>Type</label>
+          <select name="type_depense">
+            <option>Fonctionnement</option>
+            <option>Investissement</option>
+            <option>Prestations</option>
+            <option>Déplacements</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="row two">
+        <div><label>Libellé (min 5 caractères)</label><input name="libelle" required></div>
+        <div><label>Montant (€) (doit être > 0)</label><input name="montant" type="number" step="0.01" value="0.01"></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="row three">
+        <div><label>Fournisseur (optionnel)</label><input name="fournisseur"></div>
+        <div><label>Référence facture/reçu (optionnel)</label><input name="reference"></div>
+        <div>
+          <label>Mode de paiement (optionnel)</label>
+          <select name="mode_paiement">
+            <option value="">--</option>
+            <option>CB</option>
+            <option>Virement</option>
+            <option>Espèces</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="row two">
+        <div><label>Date paiement</label><input name="date_paiement" type="date"></div>
+        <div style="display:flex;align-items:end;"><button class="btn ok" type="submit">Créer la dépense</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const createInv = document.getElementById('createInv');
+  const invBlock = document.getElementById('invBlock');
+  if (createInv && invBlock) {
+    createInv.addEventListener('change', ()=>{
+      invBlock.style.display = createInv.checked ? 'block' : 'none';
+    });
+  }
+</script>
+
+<script>
+  const subSelect = document.getElementById("subSelect");
+  const compteSelect = document.getElementById("compteSelect");
+  const ligneSelect = document.getElementById("ligneSelect");
+  const ligneInfo = document.getElementById("ligneInfo");
+
+  async function loadComptes(subId){
+    compteSelect.innerHTML = `<option value="">-- choisir --</option>`;
+    ligneSelect.innerHTML = `<option value="">-- choisir --</option>`;
+    ligneInfo.textContent = "";
+
+    if(!subId) return;
+
+    const r = await fetch(`/api/subvention/${subId}/comptes?nature=charge`);
+    const data = await r.json();
+    (data.comptes || []).forEach(c=>{
+      const opt = document.createElement("option");
+      opt.value = c; opt.textContent = c;
+      compteSelect.appendChild(opt);
+    });
+  }
+
+  async function loadLignes(subId, compte){
+    ligneSelect.innerHTML = `<option value="">-- choisir --</option>`;
+    ligneInfo.textContent = "";
+    if(!subId) return;
+
+    const url = compte ? `/api/subvention/${subId}/lignes?nature=charge&compte=${encodeURIComponent(compte)}` : `/api/subvention/${subId}/lignes?nature=charge`;
+    const r = await fetch(url);
+    const data = await r.json();
+
+    (data.lignes || []).forEach(l=>{
+      const opt = document.createElement("option");
+      opt.value = l.id;
+      opt.textContent = `${l.compte} · ${l.libelle}`;
+      opt.dataset.reel = l.montant_reel;
+      opt.dataset.engage = l.engage;
+      opt.dataset.reste = l.reste;
+      ligneSelect.appendChild(opt);
+    });
+  }
+
+  subSelect.addEventListener("change", e=> loadComptes(e.target.value));
+  compteSelect.addEventListener("change", e=> loadLignes(subSelect.value, e.target.value));
+
+  ligneSelect.addEventListener("change", e=>{
+    const opt = e.target.options[e.target.selectedIndex];
+    if(!opt || !opt.value){ ligneInfo.textContent = ""; return; }
+    ligneInfo.textContent = `Alloué: ${opt.dataset.reel}€ · Engagé: ${opt.dataset.engage}€ · Reste: ${opt.dataset.reste}€`;
+  });
+</script>
+
+{% endblock %}

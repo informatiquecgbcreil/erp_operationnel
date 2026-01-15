@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="card">
+    <h1>Subventions</h1>
+    <p>Liste des subventions non archivées.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Année</th><th>Secteur</th><th>Nom</th>
+            <th>Demandé</th><th>Attribué</th><th>Reçu</th>
+            <th>Lignes réel</th><th>Engagé</th><th>Reste</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in subs %}
+            <tr>
+              <td>{{ s.annee_exercice }}</td>
+              <td>{{ s.secteur }}</td>
+              <td><strong>{{ s.nom }}</strong></td>
+              <td>{{ "%.2f"|format(s.montant_demande or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.montant_attribue or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.montant_recu or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.total_reel_lignes or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.total_engage or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.total_reste or 0) }}€</td>
+              <td>{% if can("subventions:edit") %}<a class="btn" href="{{ url_for('main.subvention_pilotage', subvention_id=s.id) }}">Pilotage</a>{% else %}<span class="muted">Lecture seule</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Créer une subvention</h2>
+
+    <form method="POST" action="{{ url_for('main.subvention_create') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="row two">
+        <div>
+          <label>Nom</label>
+          <input name="nom" required>
+        </div>
+
+        <div class="row two">
+          <div>
+            <label>Année</label>
+            <input name="annee_exercice" type="number" value="2025">
+          </div>
+
+          {% if not can('scope:all_secteurs') %}
+            <div>
+              <label>Secteur (verrouillé)</label>
+              <input value="{{ current_user.secteur_assigne }}" disabled>
+              <input type="hidden" name="secteur" value="{{ current_user.secteur_assigne }}">
+            </div>
+          {% else %}
+            <div>
+              <label>Secteur</label>
+              <select name="secteur" required>
+                <option value="">-- Choisir --</option>
+{% for sec in secteurs %}
+                  <option value="{{ sec }}">{{ sec }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="row three">
+        <div>
+          <label>Montant demandé (€)</label>
+          <input name="montant_demande" type="number" step="0.01" value="0">
+        </div>
+        <div>
+          <label>Montant attribué (€)</label>
+          <input name="montant_attribue" type="number" step="0.01" value="0">
+        </div>
+        <div>
+          <label>Montant reçu (€)</label>
+          <input name="montant_recu" type="number" step="0.01" value="0">
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn ok" type="submit">Créer</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

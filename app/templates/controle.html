@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="grid two">
+  <div class="card">
+    <h1>Contrôle</h1>
+    <p class="muted">
+      Cette page est volontairement “safe” : elle ne dépend d’aucune requête complexe.
+      Elle sert de point d’entrée pour les routines de contrôle à venir.
+    </p>
+
+    <div class="spacer"></div>
+
+    <h2>Exports rapides</h2>
+    <div class="inline">
+      <a class="btn" href="{{ url_for('main.export_depenses_csv') }}">Exporter toutes les dépenses (CSV)</a>
+      <a class="btn" href="{{ url_for('main.stats') }}">Aller à Stats</a>
+    </div>
+
+    <div class="spacer"></div>
+
+    <h2>Rappels “blindage” actuel</h2>
+    <ul class="muted">
+      <li>Responsable secteur : ne peut pas dépasser le reste d’une ligne.</li>
+      <li>Suppression responsable = soft delete (ne compte plus dans les totaux).</li>
+      <li>Justificatif non obligatoire (mais recommandé).</li>
+      <li>Export dépenses = exclut les soft delete.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Prochaine étape (quand tu veux)</h2>
+    <p class="muted">
+      Là on peut rendre cette page vraiment utile en listant automatiquement :
+    </p>
+    <ul class="muted">
+      <li>Dépenses sans justificatif</li>
+      <li>Dépenses soft delete</li>
+      <li>Dépenses avec fournisseur / ref pièce manquants</li>
+      <li>Dépenses “brouillon” / anomalies</li>
+    </ul>
+    <p class="muted">
+      Ça, c’est le tableau de bord qui fait gagner des heures à ta responsable financière.
+    </p>
+  </div>
+</div>
+
+{% endblock %}

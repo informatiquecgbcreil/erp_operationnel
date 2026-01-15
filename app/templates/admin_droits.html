@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<style>
+  /* RBAC page layout fixes (keep it local to avoid side effects) */
+  .rbac-wrap{max-width:1200px;margin:0 auto;padding:16px;}
+  .rbac-grid{display:grid;grid-template-columns: 1.2fr 1fr;gap:16px;align-items:start;}
+  @media (max-width: 1100px){.rbac-grid{grid-template-columns:1fr;}}
+  .rbac-card{background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.06);border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+  .rbac-card h2{margin:0 0 8px 0;font-size:22px;}
+  .rbac-muted{color:rgba(0,0,0,.55);font-size:13px;margin:0 0 10px 0;}
+  .rbac-table{width:100%;border-collapse:collapse;}
+  .rbac-table th,.rbac-table td{padding:10px 8px;border-bottom:1px solid rgba(0,0,0,.06);vertical-align:top;}
+  .rbac-table th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:rgba(0,0,0,.55);}
+  .rbac-scroll{max-height:520px;overflow:auto;border:1px solid rgba(0,0,0,.06);border-radius:12px;}
+  .rbac-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;}
+  .rbac-btn{border:1px solid rgba(0,0,0,.18);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;}
+  .rbac-btn.primary{background:#111827;color:#fff;border-color:#111827;}
+  .rbac-input{border:1px solid rgba(0,0,0,.18);border-radius:10px;padding:8px 10px;min-width:160px;}
+  .rbac-select{border:1px solid rgba(0,0,0,.18);border-radius:10px;padding:8px 10px;min-width:220px;max-width:360px;width:100%;}
+  .rbac-select[multiple]{min-height:80px;}
+  .rbac-pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.14);background:rgba(0,0,0,.03);font-size:12px;}
+  .rbac-perms{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .rbac-perm{display:flex;gap:8px;align-items:flex-start;border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:8px;background:#fff;}
+  .rbac-perm code{font-size:12px;}
+</style>
+
+<div class="rbac-wrap">
+  <div class="rbac-card" style="margin-bottom:16px;">
+    <h2>Droits &#128274;</h2>
+    <p class="rbac-muted">Gestion des r&ocirc;les et permissions (RBAC). Les modifications sont imm&eacute;diates.</p>
+  </div>
+
+  <div class="rbac-grid">
+
+    <!-- USERS -->
+    <div class="rbac-card">
+      <h3 style="margin:0 0 10px 0;">Utilisateurs</h3>
+      <div class="rbac-scroll">
+        <table class="rbac-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>R&ocirc;les</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for u in users %}
+            <tr>
+              <td>{{ u.nom }}</td>
+              <td style="white-space:nowrap;">{{ u.email }}</td>
+              <td>
+                <form method="post" action="{{ url_for('admin.set_user_roles') }}" class="rbac-actions" style="justify-content:flex-start;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  {# role codes currently assigned #}
+                  {% set assigned = [] %}
+                  {% if u.roles is defined %}
+                    {% set assigned = u.roles | map(attribute='code') | list %}
+                  {% endif %}
+                  <select class="rbac-select" name="role_codes" multiple>
+                    {% for r in roles %}
+                      <option value="{{ r.code }}" {% if r.code in assigned %}selected{% endif %}>{{ r.code }}{% if r.label %} - {{ r.label }}{% endif %}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="rbac-btn primary" type="submit">Enregistrer</button>
+                </form>
+                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+                  <span class="rbac-pill">roles: {{ u.role_codes|join(', ') }}</span>
+                  {% if u.secteur_assigne %}<span class="rbac-pill">{{ u.secteur_assigne }}</span>{% endif %}
+                </div>
+              </td>
+              <td></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="rbac-muted" style="margin-top:10px;">Astuce: sur Windows, Ctrl+F5 pour forcer le refresh si un menu te semble fig&eacute;.</p>
+    </div>
+
+    <!-- ROLES -->
+    <div class="rbac-card">
+      <div class="rbac-actions" style="justify-content:space-between;margin-bottom:10px;">
+        <h3 style="margin:0;">R&ocirc;les</h3>
+        <form method="post" action="{{ url_for('admin.create_role') }}" class="rbac-actions">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input class="rbac-input" name="code" placeholder="role_code" required>
+          <input class="rbac-input" name="label" placeholder="Libelle">
+          <button class="rbac-btn" type="submit">+ Cr&eacute;er</button>
+        </form>
+      </div>
+
+      <form method="post" action="{{ url_for('admin.save_role_perms') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="rbac-actions" style="justify-content:flex-start;margin-bottom:10px;">
+          <label for="role_code" style="font-size:13px;color:rgba(0,0,0,.6);">Role</label>
+          <select id="role_code" class="rbac-select" name="role_code" required>
+            <option value="">-- choisir --</option>
+            {% for r in roles %}
+              <option value="{{ r.code }}">{{ r.code }}{% if r.label %} - {{ r.label }}{% endif %}</option>
+            {% endfor %}
+          </select>
+          <button class="rbac-btn primary" type="submit">Enregistrer</button>
+        </div>
+
+        <div class="rbac-perms">
+          {% for p in perms %}
+            <label class="rbac-perm">
+              <input type="checkbox" name="perm_codes" value="{{ p.code }}">
+              <div>
+                <div><code>{{ p.code }}</code></div>
+                <div class="rbac-muted" style="margin:2px 0 0 0;">{{ p.label }}</div>
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+      </form>
+
+      <hr style="border:none;border-top:1px solid rgba(0,0,0,.08);margin:14px 0;">
+      <form method="post" action="{{ url_for('admin.delete_role') }}" class="rbac-actions" style="justify-content:flex-start;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="delete_role_code" style="font-size:13px;color:rgba(0,0,0,.6);">Supprimer un role</label>
+        <select id="delete_role_code" class="rbac-select" name="role_code" required>
+          <option value="">-- choisir --</option>
+          {% for r in roles %}
+            <option value="{{ r.code }}">{{ r.code }}</option>
+          {% endfor %}
+        </select>
+        <button class="rbac-btn" type="submit">Supprimer</button>
+      </form>
+
+      <script>
+        // When the role changes, fetch its permissions (if endpoint exists)
+        const roleSel = document.getElementById('role_code');
+        const permBoxes = Array.from(document.querySelectorAll('input[name="perm_codes"]'));
+
+        async function loadRolePerms(code){
+          permBoxes.forEach(cb => cb.checked = false);
+          if(!code) return;
+          try{
+            const resp = await fetch(`{{ url_for('admin.get_role_perms', role_code='__ROLE__') }}`.replace('__ROLE__', encodeURIComponent(code)));
+            if(!resp.ok) return;
+            const data = await resp.json();
+            const set = new Set(data.perms || []);
+            permBoxes.forEach(cb => { if(set.has(cb.value)) cb.checked = true; });
+          }catch(e){ /* silent */ }
+        }
+        roleSel?.addEventListener('change', e => loadRolePerms(e.target.value));
+      </script>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

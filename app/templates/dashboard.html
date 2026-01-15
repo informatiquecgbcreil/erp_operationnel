@@ -1,0 +1,257 @@
+{% extends "layout.html" %}
+{% block body %}
+
+{#
+  Dashboard "vivant" : KPIs + graphiques + alertes + récents + raccourcis.
+  Les données sont fournies par app.services.dashboard_service.build_dashboard_context.
+#}
+
+<div class="stack">
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h1 style="margin:0;">Dashboard</h1>
+        <p class="muted" style="margin:6px 0 0 0;">Vue synthèse · Période activité : {{ days or 90 }} jours</p>
+      </div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <a class="btn" href="{{ url_for('main.dashboard', days=30) }}">30j</a>
+        <a class="btn" href="{{ url_for('main.dashboard', days=90) }}">90j</a>
+        <a class="btn" href="{{ url_for('main.dashboard', days=365) }}">12 mois</a>
+      </div>
+    </div>
+
+    {% if mode == "admin_tech" %}
+      <div class="spacer"></div>
+      <p>Tu es <strong>admin_tech</strong> : accès technique (pas de pilotage budget).</p>
+    {% else %}
+      <div class="spacer"></div>
+      <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px;">
+        <div class="card" style="padding:12px;">
+          <div class="muted">Budget attribué</div>
+          <div class="kpi" data-count="{{ (kpis.attribue or 0) | round(0) }}" style="font-size:22px; font-weight:800;">{{ "%.2f"|format(kpis.attribue or 0) }}€</div>
+        </div>
+        <div class="card" style="padding:12px;">
+          <div class="muted">Engagé</div>
+          <div class="kpi" data-count="{{ (kpis.engage or 0) | round(0) }}" style="font-size:22px; font-weight:800;">{{ "%.2f"|format(kpis.engage or 0) }}€</div>
+        </div>
+        <div class="card" style="padding:12px;">
+          <div class="muted">Disponible</div>
+          <div class="kpi" data-count="{{ (kpis.reste or 0) | round(0) }}" style="font-size:22px; font-weight:800;">{{ "%.2f"|format(kpis.reste or 0) }}€</div>
+        </div>
+        <div class="card" style="padding:12px;">
+          <div class="muted">Taux conso</div>
+          <div style="display:flex; align-items:baseline; gap:8px;">
+            <div style="font-size:22px; font-weight:800;">{{ kpis.taux or 0 }}%</div>
+            <span class="muted">(sur attribué)</span>
+          </div>
+          <div style="height:8px; background:rgba(255,255,255,0.08); border-radius:999px; overflow:hidden; margin-top:8px;">
+            <div style="height:8px; width: {{ (kpis.taux or 0) if (kpis.taux or 0) <= 100 else 100 }}%; background:rgba(255,255,255,0.65);"></div>
+          </div>
+        </div>
+        <div class="card" style="padding:12px;">
+          <div class="muted">Sessions ({{ days or 90 }}j)</div>
+          <div class="kpi" data-count="{{ kpis.sessions or 0 }}" style="font-size:22px; font-weight:800;">{{ kpis.sessions or 0 }}</div>
+        </div>
+        <div class="card" style="padding:12px;">
+          <div class="muted">Participants uniques ({{ days or 90 }}j)</div>
+          <div class="kpi" data-count="{{ kpis.uniques or 0 }}" style="font-size:22px; font-weight:800;">{{ kpis.uniques or 0 }}</div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Raccourcis #}
+  <div class="card">
+    <h2 style="margin-top:0;">Raccourcis</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      {% for sc in (shortcuts or []) %}
+        <a class="btn" href="{{ sc.url }}" style="display:inline-flex; align-items:center; gap:8px;">
+          <span aria-hidden="true">{{ sc.icon or "➡️" }}</span>
+          <span>{{ sc.label }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if mode != "admin_tech" %}
+  <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:12px;">
+
+    <div class="card">
+      <h2 style="margin-top:0;">Budget</h2>
+      <p class="muted" style="margin-top:0;">Engagé vs disponible (attribué)</p>
+      <canvas id="chartBudget" height="140"></canvas>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Dépenses</h2>
+      <p class="muted" style="margin-top:0;">Montant par mois (6 derniers mois)</p>
+      <canvas id="chartDepenses" height="140"></canvas>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Activité ateliers</h2>
+      <p class="muted" style="margin-top:0;">Sessions créées (6 derniers mois)</p>
+      <canvas id="chartSessions" height="140"></canvas>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Public ({{ days or 90 }}j)</h2>
+      <p class="muted" style="margin-top:0;">Répartition des participants uniques</p>
+      <canvas id="chartPublic" height="140"></canvas>
+    </div>
+
+  </div>
+
+  <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:12px;">
+    <div class="card">
+      <h2 style="margin-top:0;">Alertes</h2>
+      {% if alerts and alerts|length %}
+        <ul style="margin:0; padding-left:18px;">
+          {% for a in alerts %}
+            <li style="margin:8px 0;">
+              <a href="{{ a.url or '#' }}" style="text-decoration:none;">
+                {% if a.level == 'danger' %}🔴{% elif a.level == 'warning' %}🟠{% else %}ℹ️{% endif %}
+                {{ a.text }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucune alerte détectée. (Ça, c’est beau.) ✨</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Récents</h2>
+
+      <h3 style="margin:10px 0 6px 0;">🧾 Dépenses</h3>
+      {% if recents and recents.depenses and recents.depenses|length %}
+        <ul style="margin:0; padding-left:18px;">
+          {% for d in recents.depenses %}
+            <li class="muted" style="margin:6px 0;">
+              {{ d.libelle }} — <strong>{{ "%.2f"|format(d.montant or 0) }}€</strong>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucune dépense récente.</p>
+      {% endif %}
+
+      <h3 style="margin:12px 0 6px 0;">📅 Sessions</h3>
+      {% if recents and recents.sessions and recents.sessions|length %}
+        <ul style="margin:0; padding-left:18px;">
+          {% for s in recents.sessions %}
+            <li class="muted" style="margin:6px 0;">
+              Atelier #{{ s.atelier_id }} — {{ s.session_type }}
+              {% if s.date_session %} ({{ s.date_session }}){% elif s.rdv_date %} ({{ s.rdv_date }}){% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucune session récente.</p>
+      {% endif %}
+
+      <h3 style="margin:12px 0 6px 0;">👥 Participants</h3>
+      {% if recents and recents.participants and recents.participants|length %}
+        <ul style="margin:0; padding-left:18px;">
+          {% for p in recents.participants %}
+            <li class="muted" style="margin:6px 0;">
+              {{ p.nom }} {{ p.prenom }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucun participant récent.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  // Petite animation "count-up" pour donner de la vie.
+  (function() {
+    const els = document.querySelectorAll('.kpi[data-count]');
+    els.forEach(el => {
+      const target = Number(el.getAttribute('data-count') || '0');
+      if (!isFinite(target) || target <= 0) return;
+      const isMoney = (el.textContent || '').includes('€');
+      const duration = 650;
+      const start = performance.now();
+      const from = 0;
+      function tick(t) {
+        const p = Math.min((t - start) / duration, 1);
+        const val = Math.floor(from + (target - from) * (0.2 + 0.8 * p));
+        if (isMoney) {
+          // On laisse le rendu précis serveur pour la version finale, mais on anime grossièrement.
+          el.textContent = val.toLocaleString('fr-FR') + '€';
+        } else {
+          el.textContent = val.toLocaleString('fr-FR');
+        }
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  })();
+
+  const charts = {{ (charts or {}) | tojson }};
+
+  function makeDoughnut(id, cfg) {
+    const ctx = document.getElementById(id);
+    if (!ctx || !cfg) return;
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: cfg.labels,
+        datasets: [{ data: cfg.values }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  }
+
+  function makeBar(id, cfg) {
+    const ctx = document.getElementById(id);
+    if (!ctx || !cfg) return;
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: cfg.labels,
+        datasets: [{ data: cfg.values }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  function makeLine(id, cfg) {
+    const ctx = document.getElementById(id);
+    if (!ctx || !cfg) return;
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: cfg.labels,
+        datasets: [{ data: cfg.values, tension: 0.25 }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+  }
+
+  makeDoughnut('chartBudget', charts.budget_donut);
+  makeBar('chartDepenses', charts.depenses_bar);
+  makeLine('chartSessions', charts.sessions_line);
+  makeDoughnut('chartPublic', charts.public_pie);
+</script>
+
+{% endblock %}

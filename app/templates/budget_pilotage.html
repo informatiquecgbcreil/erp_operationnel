@@ -1,0 +1,257 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="card">
+    <h1>Pilotage</h1>
+    <p><strong>{{ sub.nom }}</strong> · {{ sub.secteur }} · {{ sub.annee_exercice }}</p>
+
+    {% if warnings and warnings|length %}
+      <div class="spacer"></div>
+      <h3>Alertes utiles</h3>
+      <ul>
+        {% for w in warnings %}
+          <li class="muted">{{ w }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="spacer"></div>
+
+    <div class="kpi">
+      <div class="box"><div class="muted">Demandé</div><div class="v">{{ "%.2f"|format(sub.montant_demande or 0) }}€</div></div>
+      <div class="box"><div class="muted">Attribué</div><div class="v">{{ "%.2f"|format(sub.montant_attribue or 0) }}€</div></div>
+      <div class="box"><div class="muted">Reçu</div><div class="v">{{ "%.2f"|format(sub.montant_recu or 0) }}€</div></div>
+      <div class="box"><div class="muted">Total base charges</div><div class="v">{{ "%.2f"|format(total_base or 0) }}€</div></div>
+      <div class="box"><div class="muted">Total base produits</div><div class="v">{{ "%.2f"|format(sub.total_base_produits or 0) }}€</div></div>
+      <div class="box"><div class="muted">Solde base (P - C)</div><div class="v">{{ "%.2f"|format(sub.solde_base or 0) }}€</div></div>
+      <div class="box"><div class="muted">Total réel charges</div><div class="v">{{ "%.2f"|format(sub.total_reel_lignes or 0) }}€</div></div>
+      <div class="box"><div class="muted">Total réel produits</div><div class="v">{{ "%.2f"|format(sub.total_reel_produits or 0) }}€</div></div>
+      <div class="box"><div class="muted">Solde réel (P - C)</div><div class="v">{{ "%.2f"|format(sub.solde_reel or 0) }}€</div></div>
+      <div class="box"><div class="muted">Engagé</div><div class="v">{{ "%.2f"|format(sub.total_engage or 0) }}€</div></div>
+      <div class="box"><div class="muted">Reste</div><div class="v">{{ "%.2f"|format(sub.total_reste or 0) }}€</div></div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>Montants (dossier → réalité)</h2>
+
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="update_montants">
+
+        <div class="row three">
+          <div><label>Demandé (€)</label><input name="montant_demande" type="number" step="0.01" value="{{ sub.montant_demande or 0 }}"></div>
+          <div><label>Attribué (€)</label><input name="montant_attribue" type="number" step="0.01" value="{{ sub.montant_attribue or 0 }}"></div>
+          <div><label>Reçu (€)</label><input name="montant_recu" type="number" step="0.01" value="{{ sub.montant_recu or 0 }}"></div>
+        </div>
+
+        <div class="spacer"></div>
+        <button class="btn ok" type="submit">Enregistrer</button>
+      </form>
+
+      <div class="spacer"></div>
+
+      <h3>Ventilation automatique (remplit les “montants réel”)</h3>
+      <p class="muted">
+        Pour les responsables de secteur : tu n’es pas obligé de comprendre la compta.
+        Si tu as déjà une “base”, tu peux copier. Sinon, pro-rata = une répartition automatique cohérente.
+      </p>
+
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="auto_ventilation">
+
+        <div class="row three">
+          <div>
+            <label>Montant à ventiler</label>
+            <select name="target">
+              <option value="recu">Montant reçu ({{ "%.2f"|format(sub.montant_recu or 0) }}€)</option>
+              <option value="attribue">Montant attribué ({{ "%.2f"|format(sub.montant_attribue or 0) }}€)</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Méthode</label>
+            <select name="mode">
+              <option value="copy_base">Copier base → réel</option>
+              <option value="prorata_base">Pro-rata du montant sur les bases</option>
+              <option value="reset">Réinitialiser (réel = 0)</option>
+            </select>
+          </div>
+
+          <div style="display:flex;align-items:end;">
+            <button class="btn warn" type="submit">Appliquer</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="spacer"></div>
+
+      <form method="POST" action="{{ url_for('main.subvention_delete', subvention_id=sub.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn danger" type="submit">Supprimer la subvention</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Rattacher à un projet</h2>
+      <p class="muted">Optionnel : une subvention peut être dans 0, 1 ou plusieurs projets (même secteur).</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Projet</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for p in projets %}
+              <tr>
+                <td><strong>{{ p.nom }}</strong><div class="muted">{{ p.description or "" }}</div></td>
+                <td>
+                  <form method="POST" action="{{ url_for('main.subvention_toggle_projet', subvention_id=sub.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="projet_id" value="{{ p.id }}">
+                    {% if p.id in linked_ids %}
+                      <button class="btn warn" type="submit">Retirer</button>
+                    {% else %}
+                      <button class="btn ok" type="submit">Ajouter</button>
+                    {% endif %}
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+            {% if projets|length == 0 %}
+              <tr><td colspan="2" class="muted">Aucun projet dans ce secteur.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="spacer"></div>
+      <a class="btn" href="{{ url_for('projets.projets_list') }}">Gérer les projets</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Lignes de budget</h2>
+    <p class="muted">
+      Astuce : “Théorique reçu/attribué” ne modifie rien, c’est juste un repère.  
+      “Réel” = la ventilation officielle (manuelle ou automatique) utilisée pour calculer reste/engagé.
+    </p>
+
+    <div class="spacer"></div>
+    <form method="POST" class="card" style="padding:12px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="add_ligne">
+
+      <div class="row three">
+        <div><label>Nature</label>
+          <select name="nature">
+            <option value="charge" selected>Charge</option>
+            <option value="produit">Produit</option>
+          </select>
+        </div>
+        <div><label>Compte (60/66/70/74...)</label><input name="compte" value="60"></div>
+        <div><label>Libellé</label><input name="libelle" required></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="row three">
+        <div><label>Montant base (€)</label><input name="montant_base" type="number" step="0.01" value="0"></div>
+        <div><label>Montant réel (€)</label><input name="montant_reel" type="number" step="0.01" value="0"></div>
+        <div style="display:flex;align-items:end;"><button class="btn ok" type="submit">Ajouter la ligne</button></div>
+      </div>
+    </form>
+
+    <div class="spacer"></div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nature</th>
+            <th>Compte</th>
+            <th>Libellé</th>
+            <th>Base</th>
+            <th>Théorique reçu</th>
+            <th>Théorique attribué</th>
+            <th>Réel (ventilé)</th>
+            <th>Engagé</th>
+            <th>Reste</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in sub.lignes %}
+            <tr>
+              <td>{{ (l.nature or 'charge') }}</td>
+            <td>{{ l.compte }}</td>
+              <td><strong>{{ l.libelle }}</strong></td>
+
+              <td>{{ "%.2f"|format(l.montant_base or 0) }}€</td>
+
+              <td class="muted">
+                {{ "%.2f"|format(theor_recu.get(l.id, 0) or 0) }}€
+              </td>
+
+              <td class="muted">
+                {{ "%.2f"|format(theor_attribue.get(l.id, 0) or 0) }}€
+              </td>
+
+              <td><strong>{{ "%.2f"|format(l.montant_reel or 0) }}€</strong></td>
+              <td>{{ "%.2f"|format(l.engage or 0) }}€</td>
+              <td>{{ "%.2f"|format(l.reste or 0) }}€</td>
+
+              <td>
+                <details>
+                  <summary class="btn">Modifier</summary>
+                  <div class="spacer"></div>
+
+                  <form method="POST" action="{{ url_for('main.ligne_edit', ligne_id=l.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="row three">
+                      <div><label>Compte</label><input name="compte" value="{{ l.compte }}"></div>
+                      <div><label>Libellé</label><input name="libelle" value="{{ l.libelle }}"></div>
+                      <div><label>Montant base</label><input name="montant_base" type="number" step="0.01" value="{{ l.montant_base or 0 }}"></div>
+                    </div>
+
+                    <div class="spacer"></div>
+
+                    <div class="row two">
+                      <div><label>Montant réel</label><input name="montant_reel" type="number" step="0.01" value="{{ l.montant_reel or 0 }}"></div>
+                      <div style="display:flex;align-items:end;"><button class="btn ok" type="submit">Enregistrer</button></div>
+                    </div>
+                  </form>
+
+                  <div class="spacer"></div>
+
+                  <form method="POST" action="{{ url_for('main.ligne_delete', ligne_id=l.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn danger" type="submit">Supprimer la ligne</button>
+                  </form>
+                </details>
+              </td>
+            </tr>
+          {% endfor %}
+
+          {% if sub.lignes|length == 0 %}
+            <tr>
+              <td colspan="9" class="muted">Aucune ligne. Ajoute au moins une ligne pour pouvoir ventiler.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="inline">
+      <a class="btn" href="{{ url_for('budget.depense_new') }}">Nouvelle dépense</a>
+	  <a class="btn" href="{{ url_for('budget.depenses_list') }}?subvention_id={{ sub.id }}">Voir dépenses de cette subvention</a>
+      <a class="btn" href="{{ url_for('main.export_subvention_csv', subvention_id=sub.id) }}">Export CSV subvention</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

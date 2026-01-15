@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="inline" style="justify-content:space-between; align-items:center">
+    <h1 style="margin:0">{{ 'Nouveau participant' if not item else 'Participant' }}</h1>
+    <a class="btn" href="{{ url_for('participants.list_participants') }}">⬅ Retour</a>
+  </div>
+
+  {% if item and not is_editable %}
+    <div class="card" style="border:1px solid rgba(255,255,255,.12)">
+      <div class="muted">
+        🔒 Lecture seule : ce participant a été créé pour <strong>{{ item.created_secteur or '—' }}</strong>.
+        Tu peux l’utiliser pour l’émargement, mais tu ne peux pas modifier sa fiche.
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <form method="post" style="display:flex; flex-direction:column; gap:12px">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="inline" style="gap:12px; flex-wrap:wrap">
+        <div style="flex:1; min-width:240px">
+          <label class="muted">Nom</label>
+          <input class="in" type="text" name="nom" value="{{ item.nom if item else '' }}" {% if item and not is_editable %}disabled{% endif %}>
+        </div>
+        <div style="flex:1; min-width:240px">
+          <label class="muted">Prénom</label>
+          <input class="in" type="text" name="prenom" value="{{ item.prenom if item else '' }}" {% if item and not is_editable %}disabled{% endif %}>
+        </div>
+      </div>
+
+      <div class="inline" style="gap:12px; flex-wrap:wrap">
+        <div style="flex:1; min-width:240px">
+          <label class="muted">Email</label>
+          <input class="in" type="email" name="email" value="{{ item.email if item and item.email else '' }}" {% if item and not is_editable %}disabled{% endif %}>
+        </div>
+        <div style="flex:1; min-width:240px">
+          <label class="muted">Téléphone</label>
+          <input class="in" type="text" name="telephone" value="{{ item.telephone if item and item.telephone else '' }}" {% if item and not is_editable %}disabled{% endif %}>
+        </div>
+      </div>
+
+      <div class="inline" style="gap:12px; flex-wrap:wrap">
+        <div style="flex:2; min-width:240px">
+          <label class="muted">Adresse</label>
+          <input class="in" type="text" name="adresse" value="{{ item.adresse if item and item.adresse else '' }}" {% if item and not is_editable %}disabled{% endif %}>
+        </div>
+        <div style="flex:1; min-width:240px">
+          <label class="muted">Ville</label>
+          <input class="in" type="text" name="ville" value="{{ item.ville if item and item.ville else '' }}" {% if item and not is_editable %}disabled{% endif %}>
+        </div>
+      </div>
+
+      <div class="inline" style="gap:12px; flex-wrap:wrap">
+        <div style="flex:1; min-width:240px">
+          <label class="muted">Date de naissance</label>
+          <input class="in" type="date" name="date_naissance"
+                 value="{% if item and item.date_naissance %}{{ item.date_naissance }}{% else %}{% endif %}"
+                 {% if item and not is_editable %}disabled{% endif %}>
+        </div>
+
+        <div style="flex:1; min-width:240px">
+          <label class="muted">Genre</label>
+          <select class="in" name="genre" {% if item and not is_editable %}disabled{% endif %}>
+            {% set g = (item.genre if item and item.genre else '') %}
+            <option value="" {% if not g %}selected{% endif %}>—</option>
+            <option value="Homme" {% if g == 'Homme' %}selected{% endif %}>Homme</option>
+            <option value="Femme" {% if g == 'Femme' %}selected{% endif %}>Femme</option>
+            <option value="Autre" {% if g == 'Autre' %}selected{% endif %}>Autre</option>
+          </select>
+        </div>
+
+        <div style="flex:1; min-width:240px">
+          <label class="muted">Type public</label>
+          {% set tp = (item.type_public if item and item.type_public else 'H') %}
+          <select class="in" name="type_public" {% if item and not is_editable %}disabled{% endif %}>
+            <option value="H" {% if tp == 'H' %}selected{% endif %}>Habitant</option>
+            <option value="P" {% if tp == 'P' %}selected{% endif %}>Parent</option>
+            <option value="J" {% if tp == 'J' %}selected{% endif %}>Jeune</option>
+            <option value="S" {% if tp == 'S' %}selected{% endif %}>Senior</option>
+            <option value="A" {% if tp == 'A' %}selected{% endif %}>Autre</option>
+          </select>
+        </div>
+      </div>
+
+      {% if can('participants:view_all') %}
+        <div style="max-width:360px">
+          <label class="muted">Créé pour (secteur)</label>
+          <input class="in" type="text" name="created_secteur" value="{{ item.created_secteur if item and item.created_secteur else '' }}">
+        </div>
+      {% endif %}
+
+      <div class="inline" style="gap:8px; flex-wrap:wrap">
+        {% if not item %}
+          <button class="btn ok" type="submit">Créer</button>
+        {% else %}
+          {% if is_editable %}
+            <button class="btn ok" type="submit">Enregistrer</button>
+          {% endif %}
+        {% endif %}
+        <a class="btn" href="{{ url_for('participants.list_participants') }}">Annuler</a>
+
+        {% if item and is_editable %}
+          <form method="post" action="{{ url_for('participants.anonymize_participant', participant_id=item.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn" type="submit" onclick="return confirm('Anonymiser ce participant ?')">Anonymiser</button>
+          </form>
+          <form method="post" action="{{ url_for('participants.delete_participant', participant_id=item.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn" type="submit" onclick="return confirm('Supprimer définitivement ?')">Supprimer</button>
+          </form>
+        {% endif %}
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}

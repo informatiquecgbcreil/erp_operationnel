@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="card">
+  <h1>Page introuvable (404)</h1>
+  <p class="muted">
+    La page demandée n’existe pas… ou a été déplacée.
+  </p>
+
+  <div class="spacer"></div>
+
+  <div class="inline">
+    <a class="btn" href="{{ url_for('main.dashboard') }}">Retour dashboard</a>
+    <a class="btn" href="{{ url_for('main.subventions_list') }}">Subventions</a>
+    <a class="btn" href="{{ url_for('projets.projets_list') }}">Projets</a>
+  </div>
+
+  <div class="spacer"></div>
+
+  <p class="muted" style="font-size:13px;">
+    Astuce : si tu as suivi un vieux lien (mail, doc…), reviens sur le dashboard et repars propre.
+  </p>
+</div>
+
+{% endblock %}

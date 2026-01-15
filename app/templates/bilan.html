@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="card">
+    <h1>Bilan (financeurs-ready)</h1>
+    <p class="muted">
+      Synthèse multi-subventions. Filtre par année, secteur, projet.
+    </p>
+
+    <form method="GET" class="grid two">
+      <div>
+        <label>Année</label>
+        <input name="annee" value="{{ selected_annee or '' }}" placeholder="ex: 2025">
+      </div>
+
+      <div>
+        <label>Secteur</label>
+        <select name="secteur" >
+          <option value="">-- tous --</option>
+          {% for sec in secteurs %}
+            <option value="{{ sec }}" {% if selected_secteur and (selected_secteur|string)==(sec|string) %}selected{% endif %}>{{ sec }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Projet</label>
+        <select name="projet_id" >
+          <option value="">-- tous --</option>
+          {% for p in projets %}
+            <option value="{{ p.id }}" {% if selected_projet_id and (selected_projet_id|string)==(p.id|string) %}selected{% endif %}>
+              {{ p.secteur }} · {{ p.nom }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:flex;align-items:end;gap:10px;">
+        <button class="btn ok" type="submit">Appliquer</button>
+        <a class="btn" href="{{ url_for('main.bilan_global') }}">Réinitialiser</a>
+      </div>
+    </form>
+  </div>
+
+  {% if alertes and alertes|length %}
+  <div class="card">
+    <h2>Alertes</h2>
+    <ul>
+      {% for a in alertes %}
+        <li class="muted">{{ a }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h2>Synthèse</h2>
+    <div class="kpi">
+      <div class="box"><div class="muted">Demandé</div><div class="v">{{ "%.2f"|format(totals.demande or 0) }}€</div></div>
+      <div class="box"><div class="muted">Attribué</div><div class="v">{{ "%.2f"|format(totals.attribue or 0) }}€</div></div>
+      <div class="box"><div class="muted">Reçu</div><div class="v">{{ "%.2f"|format(totals.recu or 0) }}€</div></div>
+      <div class="box"><div class="muted">Ventilé (réel lignes)</div><div class="v">{{ "%.2f"|format(totals.reel_lignes or 0) }}€</div></div>
+      <div class="box"><div class="muted">Engagé</div><div class="v">{{ "%.2f"|format(totals.engage or 0) }}€</div></div>
+      <div class="box"><div class="muted">Reste</div><div class="v">{{ "%.2f"|format(totals.reste or 0) }}€</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Subventions incluses ({{ subs|length }})</h2>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Année</th>
+            <th>Secteur</th>
+            <th>Subvention</th>
+            <th>Demandé</th>
+            <th>Attribué</th>
+            <th>Reçu</th>
+            <th>Ventilé (réel lignes)</th>
+            <th>Engagé</th>
+            <th>Reste</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in subs %}
+          <tr>
+            <td class="muted">{{ s.annee_exercice }}</td>
+            <td class="muted">{{ s.secteur }}</td>
+            <td><strong>{{ s.nom }}</strong></td>
+            <td>{{ "%.2f"|format(s.montant_demande or 0) }}€</td>
+            <td>{{ "%.2f"|format(s.montant_attribue or 0) }}€</td>
+            <td>{{ "%.2f"|format(s.montant_recu or 0) }}€</td>
+            <td><strong>{{ "%.2f"|format(s.total_reel_lignes or 0) }}€</strong></td>
+            <td>{{ "%.2f"|format(s.total_engage or 0) }}€</td>
+            <td>{{ "%.2f"|format(s.total_reste or 0) }}€</td>
+            <td>
+              <a class="btn" href="{{ url_for('main.subvention_pilotage', subvention_id=s.id) }}">Pilotage</a>
+              <a class="btn" href="{{ url_for('main.export_subvention_csv', subvention_id=s.id) }}">CSV</a>
+            </td>
+          </tr>
+          {% endfor %}
+
+          {% if subs|length == 0 %}
+          <tr><td colspan="10" class="muted">Aucune subvention pour ces filtres.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="inline">
+      <a class="btn" href="{{ url_for('main.export_depenses_csv') }}">Exporter dépenses (CSV global)</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

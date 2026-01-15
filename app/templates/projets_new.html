@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="grid two">
+  <div class="card">
+    <h1>Nouveau projet</h1>
+    <p class="muted">Crée d’abord le projet, puis tu l’ouvres pour lier les subventions et uploader un CR.</p>
+
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="row">
+        <div>
+          <label>Nom</label>
+          <input name="nom" required>
+        </div>
+
+        {% if not can('scope:all_secteurs') %}
+          <div>
+            <label>Secteur (verrouillé)</label>
+            <input value="{{ current_user.secteur_assigne }}" disabled>
+            <input type="hidden" name="secteur" value="{{ current_user.secteur_assigne }}">
+          </div>
+        {% else %}
+          <div>
+            <label>Secteur</label>
+            <select name="secteur" required>
+              <option value="">-- Choisir --</option>
+{% for sec in secteurs %}
+                <option value="{{ sec }}">{{ sec }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
+
+        <div>
+          <label>Description</label>
+          <textarea name="description" rows="5" placeholder="Objectifs, public, actions, partenaires…"></textarea>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn ok" type="submit">Créer</button>
+      <a class="btn" href="{{ url_for('projets.projets_list') }}">Annuler</a>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Conseil financeurs</h2>
+    <p class="muted">
+      Un “bon projet financeur-ready” = nom clair + description structurée + CR uploadé + subventions liées.
+      Et derrière, les exports CSV servent de base de contrôle à la responsable financière.
+    </p>
+  </div>
+</div>
+
+{% endblock %}

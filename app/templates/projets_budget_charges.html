@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="stack">
+
+  <div class="card">
+    {% include "_projet_budget_header.html" %}
+
+    {% set totals = namespace(prev=0, reel=0, ventile=0, engage=0, reste=0) %}
+    {% for c in charges %}
+      {% set totals.prev = totals.prev + (c.montant_previsionnel or 0) %}
+      {% set totals.reel = totals.reel + (c.montant_reel or 0) %}
+      {% set totals.ventile = totals.ventile + (c.ventile or 0) %}
+      {% set totals.engage = totals.engage + (c.engage or 0) %}
+      {% set totals.reste = totals.reste + (c.reste_a_financer or 0) %}
+    {% endfor %}
+    {% set total_prev = totals.prev %}
+    {% set total_reel = totals.reel %}
+    {% set total_ventile = totals.ventile %}
+    {% set total_engage = totals.engage %}
+    {% set total_reste = totals.reste %}
+    {% set pct_ventile = (total_ventile / total_prev * 100) if total_prev else 0 %}
+    {% set pct_engage = (total_engage / total_prev * 100) if total_prev else 0 %}
+
+    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:12px;">
+      <div class="card" style="padding:12px;">
+        <div class="muted">Prévisionnel</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_prev or 0) }}€</div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <div class="muted">Réel</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_reel or 0) }}€</div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <div class="muted">Ventilé</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_ventile or 0) }}€</div>
+        <div style="height:8px; border-radius:999px; background:var(--surface-soft); overflow:hidden; margin-top:8px;">
+          <div style="height:8px; width:{{ pct_ventile }}%; background:var(--accent);"></div>
+        </div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <div class="muted">Engagé</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_engage or 0) }}€</div>
+        <div style="height:8px; border-radius:999px; background:var(--surface-soft); overflow:hidden; margin-top:8px;">
+          <div style="height:8px; width:{{ pct_engage }}%; background:var(--ok);"></div>
+        </div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <div class="muted">Reste à financer</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_reste or 0) }}€</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <form method="post" class="row three">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input name="libelle" placeholder="Libellé (ex: Animateur - 0,5 ETP)" required>
+      <select name="bloc">
+        <option value="directe">Directe</option>
+        <option value="indirecte">Indirecte</option>
+      </select>
+      <input name="code_plan" placeholder="Code (60/61/62/64...)" value="60" style="max-width:140px">
+      <input name="montant_previsionnel" type="number" step="0.01" placeholder="Prévisionnel (€)" style="max-width:180px">
+      <input name="montant_reel" type="number" step="0.01" placeholder="Réel (€) (option)" style="max-width:180px">
+      <input name="commentaire" placeholder="Commentaire (option)">
+      <button class="btn ok" type="submit">Ajouter</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Bloc</th>
+            <th>Code</th>
+            <th>Libellé</th>
+            <th>Prévisionnel</th>
+            <th>Réel</th>
+            <th>Ventilé</th>
+            <th>Reste à financer</th>
+            <th>Engagé</th>
+            <th>Reste à engager</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for c in charges %}
+          <tr>
+            <td>{{ c.bloc }}</td>
+            <td>{{ c.code_plan }}</td>
+            <td>{{ c.libelle }}</td>
+            <td>{{ "%.2f"|format(c.montant_previsionnel or 0) }}€</td>
+            <td>{{ "%.2f"|format(c.montant_reel or 0) }}€</td>
+            <td>{{ "%.2f"|format(c.ventile or 0) }}€</td>
+            <td>{{ "%.2f"|format(c.reste_a_financer or 0) }}€</td>
+            <td>{{ "%.2f"|format(c.engage or 0) }}€</td>
+            <td>{{ "%.2f"|format(c.reste_a_engager or 0) }}€</td>
+            <td style="white-space:nowrap">
+              <a class="btn" href="{{ url_for('projets.projet_budget_charge_edit', projet_id=projet.id, charge_id=c.id) }}">✏️</a>
+              <form method="post" action="{{ url_for('projets.projet_budget_charge_delete', projet_id=projet.id, charge_id=c.id) }}" style="display:inline" onsubmit="return confirm('Supprimer cette charge ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn" type="submit">🗑️</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="10" class="muted">Aucune charge pour le moment.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

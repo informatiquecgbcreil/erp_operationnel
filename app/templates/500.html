@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="card">
+  <h1>Erreur interne (500)</h1>
+  <p class="muted">
+    L’application a rencontré une erreur inattendue.
+  </p>
+
+  <div class="spacer"></div>
+
+  <div class="inline">
+    <a class="btn" href="{{ url_for('main.dashboard') }}">Retour dashboard</a>
+    <a class="btn" href="{{ url_for('main.controle') }}">Contrôle</a>
+  </div>
+
+  <div class="spacer"></div>
+
+  <p class="muted" style="font-size:13px;">
+    Si l’erreur revient : note l’action faite juste avant, puis contacte l’admin technique.
+  </p>
+</div>
+
+{% endblock %}

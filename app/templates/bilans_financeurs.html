@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% if forbidden %}
+  <div class="card">
+    <h1>Bilans & Stats · Financeurs</h1>
+    <p class="muted">Accès réservé aux rôles finance/direction/responsable de secteur.</p>
+  </div>
+{% else %}
+  <div class="stack">
+    <div class="card">
+      <div class="inline" style="justify-content:space-between; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+        <h1 style="margin:0;">Financeurs (synthèse)</h1>
+        <form method="get" action="{{ url_for('bilans.financeurs') }}" class="inline" style="gap:8px;">
+          <label for="year" class="muted">Exercice</label>
+          <select id="year" name="year" onchange="this.form.submit()">
+            {% for y in years %}
+              <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+          <noscript><button class="btn" type="submit">OK</button></noscript>
+        </form>
+      </div>
+      <p class="muted">Tableau de pilotage par subvention : prévu/engagé/reste + exports.</p>
+      <div class="inline" style="gap:8px; flex-wrap:wrap;">
+        <a class="btn" href="{{ url_for('bilans.dashboard', year=year) }}">← Dashboard</a>
+        <a class="btn" href="{{ url_for('bilans.bilan_subvention', year=year) }}">🧾 Voir une subvention</a>
+      </div>
+    </div>
+
+    <div class="card">
+      {% if not data or not data.rows %}
+        <p class="muted">Aucune subvention trouvée pour cet exercice.</p>
+      {% else %}
+        <table>
+          <thead>
+            <tr>
+              <th>Secteur</th>
+              <th>Subvention</th>
+              <th style="text-align:right;">Accordé</th>
+              <th style="text-align:right;">Dépensé</th>
+              <th style="text-align:right;">Reste</th>
+              <th style="text-align:right;">Taux</th>
+              <th style="text-align:right;">À ventiler</th>
+              <th style="text-align:right;">Factures</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in data.rows %}
+              {% set t = r.taux %}
+              {% set badge = 'var(--ok)' if t < 70 else ('var(--warn)' if t < 90 else 'var(--danger)') %}
+              <tr>
+                <td>{{ r.secteur }}</td>
+                <td><strong>{{ r.nom }}</strong></td>
+                <td style="text-align:right;">{{ '%.2f'|format(r.accorde) }} €</td>
+                <td style="text-align:right;">{{ '%.2f'|format(r.depenses) }} €</td>
+                <td style="text-align:right;">{{ '%.2f'|format(r.reste) }} €</td>
+                <td style="text-align:right;">
+                  <span style="padding:2px 8px; border-radius:999px; background:{{ badge }}; color:white;">
+                    {{ '%.1f'|format(r.taux) }}%
+                  </span>
+                </td>
+                <td style="text-align:right;">{{ '%.2f'|format(r.a_ventiler) }} €</td>
+                <td style="text-align:right;">{{ r.nb_factures }}</td>
+                <td style="text-align:right; white-space:nowrap;">
+                  <a class="btn" href="{{ url_for('bilans.bilan_subvention', year=year, id=r.id) }}">Ouvrir</a>
+                  <a class="btn" href="{{ url_for('bilans.subvention_print', year=year, id=r.id) }}" target="_blank">🖨️</a>
+                  <a class="btn" href="{{ url_for('bilans.subvention_export_csv', year=year, id=r.id) }}">CSV</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

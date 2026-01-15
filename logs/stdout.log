@@ -1,0 +1,45 @@
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=0.0.0.0  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=127.0.0.1  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=127.0.0.1  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=127.0.0.1  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=127.0.0.1  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=127.0.0.1  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=127.0.0.1  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=127.0.0.1  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB URI = postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie
+DB DIALECT = postgresql
+Starting ERP (PostgreSQL/SQLite compatible) ...
+Host=127.0.0.1  Port=8000  Threads=12
+DATABASE_URL=postgresql+psycopg://erp_user:***@localhost:5432/erp_pedagogie

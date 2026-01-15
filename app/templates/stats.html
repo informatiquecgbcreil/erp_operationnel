@@ -1,0 +1,245 @@
+{% extends "layout.html" %}
+{% block body %}
+<style>
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.kpi .box{padding:12px;border:1px solid rgba(0,0,0,0.1);border-radius:12px;background:#fff}
+.kpi .box.ok{border-color:rgba(0,140,0,0.35)}
+.kpi .box.warn{border-color:rgba(220,140,0,0.45)}
+.kpi .box.bad{border-color:rgba(200,0,0,0.35)}
+</style>
+
+<div class="stack">
+
+  <div class="card">
+    <div class="inline" style="justify-content:space-between;">
+      <div>
+        <h1>Stats</h1>
+        <p class="muted">Vue synthèse : secteurs, comptes, projets.</p>
+      </div>
+      <a class="btn" href="{{ url_for('main.export_depenses_csv') }}">Exporter dépenses CSV</a>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="kpi">
+      <div class="box"><div class="muted">Total reçu</div><div class="v">{{ "%.2f"|format(total_recu or 0) }}€</div></div>
+      <div class="box"><div class="muted">Total engagé</div><div class="v">{{ "%.2f"|format(total_engage or 0) }}€</div></div>
+      <div class="box"><div class="muted">Total reste</div><div class="v">{{ "%.2f"|format(total_reste or 0) }}€</div></div>
+      <div class="box"><div class="muted">Secteurs</div><div class="v">{{ by_secteur|length }}</div></div>
+      <div class="box"><div class="muted">Comptes</div><div class="v">{{ by_compte|length }}</div></div>
+      <div class="box"><div class="muted">Projets</div><div class="v">{{ by_projet|length }}</div></div>
+    </div>
+
+    <!-- Filtres pour affiner l'analyse -->
+    <div class="spacer"></div>
+    <form method="GET" class="inline" style="flex-wrap:wrap; gap:16px; align-items:flex-end">
+      <div>
+        <label style="display:block;font-size:12px;color:var(--muted);">Année</label>
+        <select name="annee">
+          <option value="">-- toutes --</option>
+          {% for a in all_annees %}
+            <option value="{{ a }}" {% if selected_annee == a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block;font-size:12px;color:var(--muted);">Secteur</label>
+        <select name="secteur">
+          <option value="">-- tous --</option>
+          {% for s in all_secteurs %}
+            <option value="{{ s }}" {% if selected_secteur == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block;font-size:12px;color:var(--muted);">Projet</label>
+        <select name="projet_id" style="min-width:260px">
+          <option value="">-- tous --</option>
+          {% for p in projets_for_filter %}
+            <option value="{{ p.id }}" {% if selected_projet_id and (selected_projet_id|string) == (p.id|string) %}selected{% endif %}>{{ p.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {% if request.args.get('embed') %}
+        <input type="hidden" name="embed" value="{{ request.args.get('embed') }}">
+      {% endif %}
+      {% if request.args.get('tab') %}
+        <input type="hidden" name="tab" value="{{ request.args.get('tab') }}">
+      {% endif %}
+
+      <button class="btn ok" type="submit">Appliquer</button>
+      <a class="btn" href="{{ url_for('main.stats') }}">Reset</a>
+    </form>
+
+    {% if selected_projet and project_indicators|length %}
+      <div class="spacer"></div>
+      <div class="card" style="margin-top:0">
+        <h2 style="margin-top:0">Indicateurs — {{ selected_projet.nom }}</h2>
+        <p class="muted">Calculés automatiquement à partir des ateliers liés au projet (et des lignes budgétaires filtrées).</p>
+        <div class="kpi">
+          {% for it in project_indicators %}
+            <div class="box {% if it.status %}{{ it.status }}{% endif %}">
+              <div class="muted">{{ it.label }}</div>
+              {% if it.value is none %}
+                <div class="v">—</div>
+              {% else %}
+                <div class="v">{{ it.value }}{{ it.unit }}</div>
+              {% endif %}
+              {% if it.target is not none %}
+                <div class="muted" style="font-size:12px; margin-top:6px">
+                  Objectif {% if it.target_op=='le' %}≤{% else %}≥{% endif %} {{ it.target }}{{ it.unit }}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>Par secteur</h2>
+      <div class="bar-list">
+        {% for sec, v in by_secteur.items() %}
+          <div class="bar-row">
+            <div class="bar-label">{{ sec }}</div>
+            <div class="bar-chart" style="width: 100%;">
+              <div class="bar-segment recu" style="width: {{ ((v.recu or 0) / max_secteur_total * 100) if max_secteur_total else 0 }}%" title="Reçu"></div>
+              <div class="bar-segment engage" style="width: {{ ((v.engage or 0) / max_secteur_total * 100) if max_secteur_total else 0 }}%" title="Engagé"></div>
+              <div class="bar-segment reste" style="width: {{ ((v.reste or 0) / max_secteur_total * 100) if max_secteur_total else 0 }}%" title="Reste"></div>
+            </div>
+            <div class="bar-values">{{ "%.2f"|format(v.recu or 0) }}€ / {{ "%.2f"|format(v.engage or 0) }}€ / {{ "%.2f"|format(v.reste or 0) }}€</div>
+          </div>
+        {% endfor %}
+        {% if by_secteur|length == 0 %}
+          <p class="muted">Aucune donnée.</p>
+        {% endif %}
+      </div>
+
+      <div class="spacer"></div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Secteur</th><th>Reçu</th><th>Engagé</th><th>Reste</th></tr></thead>
+          <tbody>
+            {% for sec, v in by_secteur.items() %}
+              <tr>
+                <td><strong>{{ sec }}</strong></td>
+                <td>{{ "%.2f"|format(v.recu or 0) }}€</td>
+                <td>{{ "%.2f"|format(v.engage or 0) }}€</td>
+                <td>{{ "%.2f"|format(v.reste or 0) }}€</td>
+              </tr>
+            {% endfor %}
+            {% if by_secteur|length == 0 %}
+              <tr><td colspan="4" class="muted">Aucune donnée.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Par compte</h2>
+      <div class="bar-list">
+        {% for c, v in by_compte.items() %}
+          <div class="bar-row">
+            <div class="bar-label">{{ c }}</div>
+            <div class="bar-chart" style="width: 100%;">
+              <div class="bar-segment recu" style="width: {{ ((v.reel or 0) / max_compte_total * 100) if max_compte_total else 0 }}%" title="Réel"></div>
+              <div class="bar-segment engage" style="width: {{ ((v.engage or 0) / max_compte_total * 100) if max_compte_total else 0 }}%" title="Engagé"></div>
+              <div class="bar-segment reste" style="width: {{ ((v.reste or 0) / max_compte_total * 100) if max_compte_total else 0 }}%" title="Reste"></div>
+            </div>
+            <div class="bar-values">{{ "%.2f"|format(v.reel or 0) }}€ / {{ "%.2f"|format(v.engage or 0) }}€ / {{ "%.2f"|format(v.reste or 0) }}€</div>
+          </div>
+        {% endfor %}
+        {% if by_compte|length == 0 %}
+          <p class="muted">Aucune donnée.</p>
+        {% endif %}
+      </div>
+
+      <div class="spacer"></div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Compte</th><th>Réel</th><th>Engagé</th><th>Reste</th></tr></thead>
+          <tbody>
+            {% for c, v in by_compte.items() %}
+              <tr>
+                <td><strong>{{ c }}</strong></td>
+                <td>{{ "%.2f"|format(v.reel or 0) }}€</td>
+                <td>{{ "%.2f"|format(v.engage or 0) }}€</td>
+                <td>{{ "%.2f"|format(v.reste or 0) }}€</td>
+              </tr>
+            {% endfor %}
+            {% if by_compte|length == 0 %}
+              <tr><td colspan="4" class="muted">Aucune donnée.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Par projet</h2>
+    <div class="bar-list">
+      {% for p in by_projet %}
+        <div class="bar-row">
+          <div class="bar-label">
+            {{ p.nom }}
+            <span class="muted" style="font-size:12px;">{{ p.secteur }}</span>
+          </div>
+          <div class="bar-chart" style="width: 100%;">
+            <div class="bar-segment recu" style="width: {{ ((p.recu or 0) / max_projet_total * 100) if max_projet_total else 0 }}%" title="Reçu"></div>
+            <div class="bar-segment engage" style="width: {{ ((p.engage or 0) / max_projet_total * 100) if max_projet_total else 0 }}%" title="Engagé"></div>
+            <div class="bar-segment reste" style="width: {{ ((p.reste or 0) / max_projet_total * 100) if max_projet_total else 0 }}%" title="Reste"></div>
+          </div>
+          <div class="bar-values">{{ "%.2f"|format(p.recu or 0) }}€ / {{ "%.2f"|format(p.engage or 0) }}€ / {{ "%.2f"|format(p.reste or 0) }}€</div>
+        </div>
+      {% endfor %}
+      {% if by_projet|length == 0 %}
+        <p class="muted">Aucun projet.</p>
+      {% endif %}
+    </div>
+
+    <div class="spacer"></div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Secteur</th>
+            <th>Projet</th>
+            <th>Demandé</th>
+            <th>Attribué</th>
+            <th>Reçu</th>
+            <th>Lignes réel</th>
+            <th>Engagé</th>
+            <th>Reste</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in by_projet %}
+            <tr>
+              <td>{{ p.secteur }}</td>
+              <td><strong>{{ p.nom }}</strong></td>
+              <td>{{ "%.2f"|format(p.demande or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.attribue or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.recu or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.reel_lignes or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.engage or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.reste or 0) }}€</td>
+            </tr>
+          {% endfor %}
+          {% if by_projet|length == 0 %}
+            <tr><td colspan="8" class="muted">Aucun projet.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

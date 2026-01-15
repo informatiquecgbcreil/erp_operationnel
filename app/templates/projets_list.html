@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="card">
+    <div class="inline" style="justify-content:space-between;">
+      <div>
+        <h1>Projets</h1>
+        <p class="muted">Les projets servent de vue “financeurs” : agrégation des subventions liées + upload du compte-rendu.</p>
+      </div>
+      <a class="btn ok" href="{{ url_for('projets.projets_new') }}">+ Nouveau projet</a>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Secteur</th>
+            <th>Projet</th>
+            <th>CR</th>
+            <th>Demandé</th>
+            <th>Attribué</th>
+            <th>Reçu</th>
+            <th>Engagé</th>
+            <th>Reste</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in projets %}
+            <tr>
+              <td>{{ p.secteur }}</td>
+              <td><strong>{{ p.nom }}</strong><div class="muted">{{ (p.description or "")[:80] }}{% if (p.description or "")|length > 80 %}…{% endif %}</div></td>
+              <td>
+                {% if p.cr_filename %}
+                  <span class="muted">✅</span>
+                {% else %}
+                  <span class="muted">—</span>
+                {% endif %}
+              </td>
+              <td>{{ "%.2f"|format(p.total_demande or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.total_attribue or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.total_recu or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.total_engage or 0) }}€</td>
+              <td>{{ "%.2f"|format(p.total_reste or 0) }}€</td>
+              <td>
+                <div class="inline" style="gap:8px; flex-wrap:wrap;">
+                  <a class="btn" href="{{ url_for('projets.projets_edit', projet_id=p.id) }}">Ouvrir</a>
+                  <form method="post" action="{{ url_for('projets.projets_delete', projet_id=p.id) }}" onsubmit="return confirm('Supprimer ce projet définitivement ? (irréversible)');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn danger" type="submit">Supprimer</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+          {% if projets|length == 0 %}
+            <tr><td colspan="9" class="muted">Aucun projet pour le moment.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

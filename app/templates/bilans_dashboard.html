@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  {% if forbidden %}
+    <div class="card">
+      <h1>Bilans & Stats</h1>
+      <p class="muted">Accès réservé aux rôles finance/direction/responsable de secteur.</p>
+    </div>
+  {% else %}
+    <div class="stack">
+      <div class="card">
+        <div class="inline" style="justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
+          <h1 style="margin:0;">Bilans & Stats</h1>
+
+          <form method="get" action="{{ url_for('bilans.dashboard') }}" class="inline" style="gap:8px;">
+            <label for="year" class="muted">Exercice</label>
+            <select id="year" name="year" onchange="this.form.submit()">
+              {% for y in years %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+              {% endfor %}
+            </select>
+            <noscript><button class="btn" type="submit">OK</button></noscript>
+          </form>
+        </div>
+        <p class="muted">
+          {% if scope.secteurs is none %}
+            Vue globale (tous secteurs)
+          {% else %}
+            Périmètre : {{ scope.secteurs|join(', ') if scope.secteurs else '—' }}
+          {% endif %}
+        </p>
+
+        <div class="inline" style="gap:8px; flex-wrap:wrap; margin-top:10px;">
+          <a class="btn" href="{{ url_for('bilans.bilan_secteur', year=year) }}">📊 Bilan par secteur</a>
+          <a class="btn" href="{{ url_for('bilans.bilan_subvention', year=year) }}">🧾 Bilan par subvention</a>
+          <a class="btn" href="{{ url_for('bilans.qualite', year=year) }}">🧹 Qualité de gestion</a>
+          <a class="btn" href="{{ url_for('bilans.inventaire', year=year) }}">📦 Inventaire</a>
+          {% if has_perm("bilans:view") %}
+          <a class="btn" href="{{ url_for('bilans.bilans_lourds', year=year) }}">🧠 Bilans lourds</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- KPI tiles -->
+      <div class="grid two">
+        <div class="card">
+          <h3>Dépenses engagées</h3>
+          <h2>{{ '%.2f'|format(kpis.depenses) }} €</h2>
+          <p class="muted">Dépenses validées (charges) sur l'année.</p>
+        </div>
+        <div class="card">
+          <h3>Budget total disponible</h3>
+          <h2>{{ '%.2f'|format(kpis.budget) }} €</h2>
+          <p class="muted">Somme des montants réels (lignes charges) des subventions.</p>
+        </div>
+        <div class="card">
+          <h3>Taux d'exécution</h3>
+          <h2>{{ '%.1f'|format(kpis.taux_exec) }} %</h2>
+          <p class="muted">Dépenses / Budget.</p>
+        </div>
+        <div class="card">
+          <h3>Reste à engager</h3>
+          <h2>{{ '%.2f'|format(kpis.reste) }} €</h2>
+          <p class="muted">Budget restant sur l'année.</p>
+        </div>
+        <div class="card">
+          <h3>À ventiler</h3>
+          <h2>{{ '%.2f'|format(kpis.a_ventiler) }} €</h2>
+          <p class="muted">Lignes de facture marquées “À ventiler”.</p>
+        </div>
+        <div class="card">
+          <h3>Factures</h3>
+          <h2>{{ kpis.nb_factures }}</h2>
+          <p class="muted">Nombre de factures (date facture) sur l'année.</p>
+        </div>
+      </div>
+
+      <!-- Depenses mensuelles -->
+      <div class="card">
+        <h2>Évolution mensuelle des dépenses</h2>
+        <p class="muted">Basé sur la date de facture lorsque disponible.</p>
+
+        {% set maxv = (series|max(attribute='total')).total if series else 0 %}
+
+        <div class="stack">
+          {% for row in series %}
+            {% set pct = (row.total / maxv * 100) if maxv and row.total else 0 %}
+            <div>
+              <div class="inline" style="justify-content:space-between;">
+                <div class="muted">{{ '%02d'|format(row.mois) }}/{{ year }}</div>
+                <div><strong>{{ '%.2f'|format(row.total) }} €</strong></div>
+              </div>
+              <div style="height:10px;border-radius:999px;background:var(--surface-soft);overflow:hidden;border:1px solid var(--border);">
+                <div style="height:10px;width:{{ pct }}%;background:var(--accent);"></div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Répartition par secteur -->
+      <div class="card">
+        <h2>Répartition des dépenses par secteur</h2>
+        {% if not multi_secteurs %}
+          <p class="muted">Vue limitée à ton secteur.</p>
+        {% endif %}
+
+        {% set maxs = (par_secteur|max(attribute='total')).total if par_secteur else 0 %}
+
+        {% if par_secteur %}
+          <div class="stack">
+            {% for s in par_secteur %}
+              {% set pct = (s.total / maxs * 100) if maxs and s.total else 0 %}
+              <div>
+                <div class="inline" style="justify-content:space-between;">
+                  <div><strong>{{ s.secteur }}</strong></div>
+                  <div class="muted">{{ '%.2f'|format(s.total) }} €</div>
+                </div>
+                <div style="height:10px;border-radius:999px;background:var(--surface-soft);overflow:hidden;border:1px solid var(--border);">
+                  <div style="height:10px;width:{{ pct }}%;background:var(--ok);"></div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted">Aucune dépense à afficher.</p>
+        {% endif %}
+      </div>
+
+      <!-- Alertes -->
+      <div class="card">
+        <h2>Alertes (aide à la gestion)</h2>
+        {% if alertes %}
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Niveau</th>
+                  <th>Titre</th>
+                  <th>Détail</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for a in alertes %}
+                  <tr>
+                    <td>
+                      {% if a.niveau == 'danger' %}
+                        <span class="btn danger">🔴</span>
+                      {% elif a.niveau == 'warn' %}
+                        <span class="btn warn">🟠</span>
+                      {% else %}
+                        <span class="btn">ℹ️</span>
+                      {% endif %}
+                    </td>
+                    <td><strong>{{ a.titre }}</strong></td>
+                    <td class="muted">{{ a.detail }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="muted">Aucune alerte. (Oui, ça arrive.)</p>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <div class="stack">
+    <div class="card">
+      <div class="row" style="justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div>
+          <h1 style="margin:0;">Émargement · {{ secteur }}</h1>
+          <div class="muted">Ateliers collectifs + individuels mensuels, capacités et génération de feuilles.</div>
+        </div>
+        <div class="row" style="gap:10px; flex-wrap:wrap;">
+          {% if corbeille %}
+            <a class="btn" href="{{ url_for('activite.index') }}">Voir actifs</a>
+          {% else %}
+            <a class="btn" href="{{ url_for('activite.index', corbeille=1) }}">Corbeille</a>
+          {% endif %}
+          <a class="btn" href="{{ url_for('activite.atelier_new') }}">+ Nouvel atelier</a>
+          <a class="btn" href="{{ url_for('activite.participants') }}">👥 Participants</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Ateliers</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Type</th>
+              <th>Capacité</th>
+              <th>Durée</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in ateliers %}
+              <tr>
+                <td><strong>{{ a.nom }}</strong><br><span class="muted">{{ a.description or '' }}</span></td>
+                <td>{{ a.type_atelier }}</td>
+                <td>
+                  {% if a.type_atelier == 'COLLECTIF' %}
+                    {{ a.capacite_defaut or '—' }} places (défaut)
+                  {% else %}
+                    {{ a.heures_dispo_defaut_mois or 0 }} h/mois (défaut)
+                  {% endif %}
+                </td>
+                <td>{{ a.duree_defaut_minutes or '—' }} min</td>
+                <td>
+                  {% if not corbeille %}
+                    <a class="btn" href="{{ url_for('activite.sessions', atelier_id=a.id) }}">Sessions</a>
+                    <a class="btn" href="{{ url_for('activite.atelier_edit', atelier_id=a.id) }}">Paramètres</a>
+                    <form method="post" action="{{ url_for('activite.atelier_delete', atelier_id=a.id) }}" style="display:inline;" onsubmit="return confirm('Mettre cet atelier en corbeille ? (restaurable)');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn danger">Supprimer</button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="{{ url_for('activite.atelier_restore', atelier_id=a.id) }}" style="display:inline;" onsubmit="return confirm('Restaurer cet atelier ?');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn">Restaurer</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              {% if corbeille %}
+                <tr><td colspan="5" class="muted">Corbeille vide.</td></tr>
+              {% else %}
+                <tr><td colspan="5" class="muted">Aucun atelier pour l’instant.</td></tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

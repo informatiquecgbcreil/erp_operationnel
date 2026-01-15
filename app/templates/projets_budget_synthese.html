@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="stack">
+
+  <div class="card">
+    {% include "_projet_budget_header.html" %}
+  </div>
+
+  <div class="card">
+    {% set total_charges = budget_stats.total_charges or 0 %}
+    {% set total_demande = budget_stats.total_demande or 0 %}
+    {% set total_accorde = budget_stats.total_accorde or 0 %}
+    {% set total_recu = budget_stats.total_recu or 0 %}
+    {% set total_reste = budget_stats.total_charges_reste or 0 %}
+    {% set pct_demande = (total_demande / total_charges * 100) if total_charges else 0 %}
+    {% set pct_accorde = (total_accorde / total_charges * 100) if total_charges else 0 %}
+    {% set pct_recu = (total_recu / total_charges * 100) if total_charges else 0 %}
+
+    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+      <div class="card" style="padding:12px;">
+        <div class="muted">Total charges (prévisionnel)</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_charges) }}€</div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <div class="muted">Produits demandés</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_demande) }}€</div>
+        <div style="height:8px; border-radius:999px; background:var(--surface-soft); overflow:hidden; margin-top:8px;">
+          <div style="height:8px; width:{{ pct_demande }}%; background:var(--accent);"></div>
+        </div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <div class="muted">Produits accordés</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_accorde) }}€</div>
+        <div style="height:8px; border-radius:999px; background:var(--surface-soft); overflow:hidden; margin-top:8px;">
+          <div style="height:8px; width:{{ pct_accorde }}%; background:var(--ok);"></div>
+        </div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <div class="muted">Produits reçus</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_recu) }}€</div>
+        <div style="height:8px; border-radius:999px; background:var(--surface-soft); overflow:hidden; margin-top:8px;">
+          <div style="height:8px; width:{{ pct_recu }}%; background:var(--accent);"></div>
+        </div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <div class="muted">Reste à financer</div>
+        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_reste) }}€</div>
+        <div class="muted" style="font-size:12px; margin-top:4px;">Écart à couvrir pour équilibrer le budget.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Alertes</h3>
+    <ul>
+    {% for a in alertes %}
+      <li>{{ a }}</li>
+    {% else %}
+      <li class="muted">Aucune alerte, c’est presque louche.</li>
+    {% endfor %}
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  {% set tab = request.args.get('tab', 'projet') %}
+  <div class="stack">
+    <div class="card">
+      <h1 style="margin-top:0;">Stats pédagogiques</h1>
+      <div class="row" style="gap:10px; flex-wrap:wrap;">
+        <a class="pill {% if tab == 'projet' %}active{% endif %}" href="{{ url_for('statsimpact.stats_pedagogie', tab='projet') }}">Suivi Projet</a>
+        <a class="pill {% if tab == 'atelier' %}active{% endif %}" href="{{ url_for('statsimpact.stats_pedagogie', tab='atelier') }}">Suivi Atelier</a>
+        <a class="pill {% if tab == 'participant' %}active{% endif %}" href="{{ url_for('statsimpact.stats_pedagogie', tab='participant') }}">Suivi Participant</a>
+      </div>
+    </div>
+
+    {% if tab == 'projet' %}
+      <div class="card">
+        <h2>Suivi Projet</h2>
+        <form method="get" class="inline">
+          <input type="hidden" name="tab" value="projet">
+          <select class="in" name="projet_id" required>
+            <option value="">Choisir un projet…</option>
+            {% for p in projets %}
+              <option value="{{ p.id }}" {% if projet and p.id == projet.id %}selected{% endif %}>{{ p.secteur }} · {{ p.nom }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn ok" type="submit">Afficher</button>
+        </form>
+
+        {% if projet %}
+          <div class="spacer"></div>
+          {% if projet_objectifs %}
+            <div class="stack">
+              {% for item in projet_objectifs %}
+                <div class="card" style="background:var(--surface-soft); border-style:dashed;">
+                  <strong>{{ item.objectif.titre }}</strong>
+                  <div class="muted">{{ item.objectif.description or '' }}</div>
+                  <div class="muted">Objectifs spécifiques validés : {{ item.success }} / {{ item.total }}</div>
+                  <div style="background:var(--surface-strong); border-radius:999px; overflow:hidden; margin-top:8px;">
+                    <div style="width:{{ item.ratio|round(0) }}%; background:var(--ok); padding:4px 8px; color:#fff;">
+                      {{ item.ratio|round(0) }}%
+                    </div>
+                  </div>
+                  <div class="muted">Seuil de validation : {{ item.objectif.seuil_validation|round(0) }}%</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="muted">Aucun objectif général défini pour ce projet.</div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if tab == 'atelier' %}
+      <div class="card">
+        <h2>Suivi Atelier</h2>
+        <form method="get" class="inline">
+          <input type="hidden" name="tab" value="atelier">
+          <select class="in" name="atelier_id" required>
+            <option value="">Choisir un atelier…</option>
+            {% for a in ateliers %}
+              <option value="{{ a.id }}" {% if atelier and a.id == atelier.id %}selected{% endif %}>{{ a.secteur }} · {{ a.nom }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn ok" type="submit">Afficher</button>
+        </form>
+
+        {% if atelier %}
+          <div class="spacer"></div>
+          <div class="stack">
+            {% for item in atelier_stats.objectifs %}
+              <div class="card" style="background:var(--surface-soft); border-style:dashed;">
+                <strong>{{ item.objectif.titre }}</strong>
+                <div class="muted">{{ item.objectif.description or '' }}</div>
+                <div class="muted">Objectifs opérationnels validés : {{ item.success }} / {{ item.total }}</div>
+                <div style="background:var(--surface-strong); border-radius:999px; overflow:hidden; margin-top:8px;">
+                  <div style="width:{{ item.ratio|round(0) }}%; background:var(--ok); padding:4px 8px; color:#fff;">
+                    {{ item.ratio|round(0) }}%
+                  </div>
+                </div>
+                <div class="muted">Seuil de validation : {{ item.objectif.seuil_validation|round(0) }}%</div>
+              </div>
+            {% else %}
+              <div class="muted">Aucun objectif spécifique défini pour cet atelier.</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if tab == 'participant' %}
+      <div class="card">
+        <h2>Suivi Participant (passeport)</h2>
+        <form method="get" class="inline">
+          <input type="hidden" name="tab" value="participant">
+          <select class="in" name="participant_id" required>
+            <option value="">Choisir un participant…</option>
+            {% for p in participants %}
+              <option value="{{ p.id }}" {% if participant and p.id == participant.id %}selected{% endif %}>{{ p.nom }} {{ p.prenom }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn ok" type="submit">Afficher</button>
+        </form>
+
+        {% if participant %}
+          <div class="spacer"></div>
+          <div class="row" style="justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+            <div>
+              <strong>{{ participant.nom }} {{ participant.prenom }}</strong>
+              <div class="muted">{{ participant.email or '' }}</div>
+            </div>
+            <a class="btn" href="{{ url_for('statsimpact.stats_pedagogie_bilan', participant_id=participant.id) }}">Imprimer Bilan PDF</a>
+          </div>
+          <div class="spacer"></div>
+          {% for group in participant_groups %}
+            <div class="card" style="background:var(--surface-soft); border-style:dashed;">
+              <h3 style="margin-top:0;">{{ group.referentiel }}</h3>
+              <div class="tablewrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Compétence</th>
+                      <th>Date</th>
+                      <th>Atelier</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in group.rows %}
+                      <tr>
+                        <td>{{ row.competence }}</td>
+                        <td class="muted">{{ row.date }}</td>
+                        <td class="muted">{{ row.atelier or '—' }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% else %}
+            <div class="muted">Aucune compétence acquise pour le moment.</div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'kiosk/base.html' %}
+{% block body %}
+  <div class="card">
+    <h1 style="margin:0;">Kiosque émargement</h1>
+    <p class="muted" style="margin:6px 0 0 0;">Entre le code (4 chiffres) affiché par l'animateur, ou choisis une session ouverte.</p>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="card">
+        {% for cat, msg in messages %}
+          <div class="muted"><strong>{{ msg }}</strong></div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="grid" style="grid-template-columns:1fr; gap:12px;">
+    <div class="card">
+      <h2 style="margin-top:0;">1) Entrer le code</h2>
+      <form method="post" class="row" style="gap:10px; flex-wrap:wrap;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input class="in" name="pin" placeholder="Code" inputmode="numeric" pattern="[0-9]*" style="max-width:180px;" required>
+        <button class="btn" type="submit">Continuer</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">2) Choisir une session ouverte</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Code</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in sessions %}
+              <tr>
+                <td>
+                  <strong>{{ it.label }}</strong>
+                </td>
+                <td class="muted">{{ it.pin or '—' }}</td>
+                <td><a class="btn" href="{{ url_for('kiosk.kiosk_session', token=it.token) }}">Je participe</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="3" class="muted">Aucune session ouverte pour le moment.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="margin:10px 0 0 0;">Si tu n'es pas sûr, demande le code à l'animateur.</p>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="card">
+  <h1>Requête invalide (400)</h1>
+  <p class="muted">
+    La demande envoyée n’a pas été comprise ou n’est pas valide.
+  </p>
+
+  <div class="spacer"></div>
+
+  <div class="inline">
+    <a class="btn" href="{{ url_for('main.dashboard') }}">Retour dashboard</a>
+    <a class="btn" href="{{ url_for('main.controle') }}">Contrôle</a>
+  </div>
+</div>
+
+{% endblock %}

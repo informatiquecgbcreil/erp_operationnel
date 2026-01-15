@@ -1,0 +1,235 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="stack">
+    <div class="inline" style="align-items:flex-end">
+      <div>
+        <h1 style="margin:0">Facture #{{ f.id }}</h1>
+        <p class="muted" style="margin:6px 0 0">
+          Secteur: <strong>{{ f.secteur_principal }}</strong>
+          · Statut:
+          {% if f.statut == 'valide' %}
+            <span class="badge ok">Validée</span>
+          {% else %}
+            <span class="badge warn">Brouillon</span>
+          {% endif %}
+          · Total: <strong>{{ "%.2f"|format(f.total or 0) }} €</strong>
+        </p>
+      </div>
+      <div class="inline" style="margin-left:auto">
+        <a class="btn" href="{{ url_for('inventaire.factures_list') }}">⬅ Retour</a>
+        {% if f.filename %}
+          <a class="btn" href="{{ url_for('inventaire.facture_download', facture_id=f.id) }}">📎 Télécharger</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="grid two">
+      <div class="card">
+        <h2 style="margin-top:0">Infos</h2>
+        <div class="tablewrap">
+          <table style="min-width:520px">
+            <tbody>
+              <tr><th style="width:180px">Date</th><td>{{ f.date_facture or "—" }}</td></tr>
+              <tr><th>Fournisseur</th><td>{{ f.fournisseur or "—" }}</td></tr>
+              <tr><th>Référence</th><td>{{ f.reference_facture or "—" }}</td></tr>
+              <tr><th>Pièce jointe</th><td>{{ f.original_name or "—" }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="spacer"></div>
+        {% if f.statut != 'valide' %}
+          <form method="post" action="{{ url_for('inventaire.facture_validate', facture_id=f.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn ok" type="submit">✅ Valider (générer les dépenses)</button>
+            <div class="help">Une fois validée, la facture devient un historique + on bloque la suppression des lignes.</div>
+          </form>
+        {% else %}
+          <div class="help">Facture validée : les dépenses ont été générées. (Tu peux les retrouver dans “Dépenses”.)</div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Ajouter une ligne</h2>
+        {% if f.statut == 'valide' %}
+          <p class="muted">Facture validée : ajout bloqué.</p>
+        {% else %}
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="add_line">
+
+            <div class="grid two">
+              <div>
+                <label>Financement</label>
+                <select name="financement_type" id="finSelect" required>
+                  <option value="subvention">Subvention</option>
+                  <option value="fonds_propres">Fonds propres</option>
+                  <option value="don">Don / mécénat</option>
+                  <option value="autre">Autre</option>
+                </select>
+                <div class="help">Aide terrain : si ce n'est pas une subvention, l'app créera un support "Hors subvention" pour ton secteur.</div>
+              </div>
+
+              <div id="subWrap">
+                <label>Subvention (si financement = Subvention)</label>
+                <select name="subvention_id" id="subSelect">
+                  <option value="">— (optionnel) —</option>
+                  {% for s in subs %}
+                    <option value="{{ s.id }}" data-secteur="{{ s.secteur }}">{{ s.annee_exercice }} · {{ s.nom }} ({{ s.secteur }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div>
+                <label>Ligne budgétaire (charges)</label>
+                <select name="ligne_budget_id" id="ligneSelect">
+                  <option value="">— Choisir la subvention d’abord —</option>
+                  {% for l in all_lignes %}
+                    <option value="{{ l.id }}" data-sub="{{ l.subvention_id }}">{{ l.compte }} · {{ l.libelle }}</option>
+                  {% endfor %}
+                </select>
+                <label style="margin-top:10px; display:flex; gap:10px; align-items:center">
+                  <input type="checkbox" name="a_ventiler" id="avCheck" value="1">
+                  <span>À ventiler (je régularise plus tard)</span>
+                </label>
+                <div class="help">Si coché : l'app bascule automatiquement sur une ligne tampon "À ventiler" (dans ton secteur).</div>
+              </div>
+
+              <div style="grid-column:1 / -1">
+                <label>Libellé</label>
+                <input name="libelle" placeholder="ex : Écran 24\" IPS" required>
+              </div>
+
+              <div>
+                <label>Quantité</label>
+                <input type="number" name="quantite" min="1" value="1" required>
+              </div>
+
+              <div>
+                <label>Prix unitaire (€)</label>
+                <input type="number" step="0.01" name="prix_unitaire" value="0">
+              </div>
+
+              <div style="grid-column:1 / -1">
+                <label>Montant de la ligne (€)</label>
+                <input type="number" step="0.01" name="montant_ligne" value="0">
+                <div class="help">Si tu laisses 0 : montant = quantité × prix unitaire.</div>
+              </div>
+            </div>
+
+            <div class="spacer"></div>
+            <button class="btn ok" type="submit">➕ Ajouter</button>
+          </form>
+
+          <script>
+            const finSelect = document.getElementById('finSelect');
+            const subWrap = document.getElementById('subWrap');
+            const subSelect = document.getElementById('subSelect');
+            const ligneSelect = document.getElementById('ligneSelect');
+            const avCheck = document.getElementById('avCheck');
+
+            function refreshLignes(){
+              const subId = subSelect.value;
+              const options = Array.from(ligneSelect.querySelectorAll('option'));
+              options.forEach((opt) => {
+                if (!opt.dataset.sub) return;
+                opt.style.display = (opt.dataset.sub === subId) ? '' : 'none';
+              });
+              // reset selection
+              ligneSelect.value = '';
+              const first = ligneSelect.querySelector('option:not([data-sub])');
+              if (first) first.textContent = subId ? '— Choisir —' : '— Choisir la subvention d’abord —';
+            }
+
+            function refreshUI(){
+              const ft = finSelect.value;
+              const isSub = (ft === 'subvention');
+              subWrap.style.display = isSub ? '' : 'none';
+              if (!isSub) {
+                subSelect.value = '';
+              }
+
+              // À ventiler : on désactive la sélection de ligne
+              const av = avCheck.checked;
+              ligneSelect.disabled = av;
+              if (av) {
+                ligneSelect.value = '';
+              }
+            }
+
+            finSelect.addEventListener('change', () => { refreshUI(); refreshLignes(); });
+            subSelect.addEventListener('change', refreshLignes);
+            avCheck.addEventListener('change', refreshUI);
+
+            refreshUI();
+            refreshLignes();
+          </script>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Lignes</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Financement</th>
+              <th>Subvention</th>
+              <th>Ligne budgétaire</th>
+              <th>Libellé</th>
+              <th>Qté</th>
+              <th>PU</th>
+              <th>Montant</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in f.lignes %}
+              <tr>
+                <td>
+                  {% if l.financement_type == 'subvention' %}
+                    <span class="badge ok">Subvention</span>
+                  {% elif l.financement_type == 'fonds_propres' %}
+                    <span class="badge warn">Fonds propres</span>
+                  {% elif l.financement_type == 'don' %}
+                    <span class="badge">Don</span>
+                  {% else %}
+                    <span class="badge">Autre</span>
+                  {% endif %}
+                  {% if l.a_ventiler %}
+                    <span class="badge warn" title="À ventiler">⏳</span>
+                  {% endif %}
+                </td>
+                <td>{{ l.subvention.nom }}</td>
+                <td>{{ l.ligne_budget.compte }} · {{ l.ligne_budget.libelle }}</td>
+                <td>{{ l.libelle }}</td>
+                <td>{{ l.quantite }}</td>
+                <td>{{ "%.2f"|format(l.prix_unitaire or 0) }} €</td>
+                <td><strong>{{ "%.2f"|format(l.montant_ligne or 0) }} €</strong></td>
+                <td style="text-align:right">
+                  <a class="btn" href="{{ url_for('inventaire_materiel.create_from_facture_ligne', ligne_id=l.id) }}">📦 Inventaire</a>
+                  {% if (l.quantite or 1) > 1 %}
+                    <a class="btn" href="{{ url_for('inventaire_materiel.create_bulk_from_facture_ligne', ligne_id=l.id) }}" onclick="return confirm('Créer {{ l.quantite }} items unitaires (quantité=1) ?')">📦 {{ l.quantite }} unitaires</a>
+                  {% endif %}
+                  {% if f.statut != 'valide' %}
+                    <form method="post" style="display:inline">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="delete_line">
+                      <input type="hidden" name="line_id" value="{{ l.id }}">
+                      <button class="btn danger" type="submit" onclick="return confirm('Supprimer cette ligne ?')">Supprimer</button>
+                    </form>
+                  {% else %}
+                    <span class="muted">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+            {% if not f.lignes %}
+              <tr><td colspan="8" class="muted">Aucune ligne pour l’instant. Ajoute-en une à droite.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

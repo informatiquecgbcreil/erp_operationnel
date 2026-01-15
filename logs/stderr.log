@@ -1,0 +1,891 @@
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+ERROR:app:Exception on /activite/participant/5/delete [POST]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.ForeignKeyViolation: UPDATE ou DELETE sur la table « participant » viole la contrainte de clé étrangère « evaluation_participant_id_fkey » de la table « evaluation »
+DETAIL:  La clé (id)=(5) est toujours référencée à partir de la table « evaluation ».
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\activite\routes.py", line 313, in participant_delete
+    db.session.commit()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 679, in execute
+    util.preloaded.orm_persistence.delete_obj(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 193, in delete_obj
+    _emit_delete_statements(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1471, in _emit_delete_statements
+    c = connection.execute(
+        ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.IntegrityError: (psycopg.errors.ForeignKeyViolation) UPDATE ou DELETE sur la table « participant » viole la contrainte de clé étrangère « evaluation_participant_id_fkey » de la table « evaluation »
+DETAIL:  La clé (id)=(5) est toujours référencée à partir de la table « evaluation ».
+[SQL: DELETE FROM participant WHERE participant.id = %(id)s::INTEGER]
+[parameters: {'id': 5}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR:app:Exception on /activite/ [GET]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2125, in _exec_insertmany_context
+    dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: la valeur d'une clé dupliquée rompt la contrainte unique « atelier_activite_pkey »
+DETAIL:  La clé « (id)=(1) » existe déjà.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\activite\routes.py", line 112, in index
+    _ensure_seed_ateliers(secteur)
+  File "I:\Users\admin\Desktop\app_gestion\app\activite\routes.py", line 93, in _ensure_seed_ateliers
+    db.session.commit()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1143, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1844, in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2133, in _exec_insertmany_context
+    self._handle_dbapi_exception(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2125, in _exec_insertmany_context
+    dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) la valeur d'une clé dupliquée rompt la contrainte unique « atelier_activite_pkey »
+DETAIL:  La clé « (id)=(1) » existe déjà.
+[SQL: INSERT INTO atelier_activite (secteur, nom, description, type_atelier, capacite_defaut, heures_dispo_defaut_mois, duree_defaut_minutes, motifs_json, modele_docx_collectif, modele_docx_individuel, created_at, is_deleted, deleted_at) SELECT p0::VARCHAR ... 1144 characters truncated ... , p12, sen_counter) ORDER BY sen_counter RETURNING atelier_activite.id, atelier_activite.id AS id__1]
+[parameters: {'nom__0': 'S.O(rdi).S', 'deleted_at__0': None, 'motifs_json__0': None, 'created_at__0': datetime.datetime(2026, 1, 8, 11, 4, 12, 250604), 'modele_docx_individuel__0': None, 'secteur__0': 'Numérique', 'capacite_defaut__0': None, 'duree_defaut_minutes__0': None, 'is_deleted__0': False, 'heures_dispo_defaut_mois__0': None, 'description__0': None, 'modele_docx_collectif__0': None, 'type_atelier__0': 'INDIVIDUEL_MENSUEL', 'nom__1': 'Accès aux droits', 'deleted_at__1': None, 'motifs_json__1': None, 'created_at__1': datetime.datetime(2026, 1, 8, 11, 4, 12, 250604), 'modele_docx_individuel__1': None, 'secteur__1': 'Numérique', 'capacite_defaut__1': None, 'duree_defaut_minutes__1': None, 'is_deleted__1': False, 'heures_dispo_defaut_mois__1': None, 'description__1': None, 'modele_docx_collectif__1': None, 'type_atelier__1': 'INDIVIDUEL_MENSUEL'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR:app:Exception on /activite/ [GET]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2125, in _exec_insertmany_context
+    dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: la valeur d'une clé dupliquée rompt la contrainte unique « atelier_activite_pkey »
+DETAIL:  La clé « (id)=(2) » existe déjà.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\activite\routes.py", line 112, in index
+    _ensure_seed_ateliers(secteur)
+  File "I:\Users\admin\Desktop\app_gestion\app\activite\routes.py", line 93, in _ensure_seed_ateliers
+    db.session.commit()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1143, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1844, in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2133, in _exec_insertmany_context
+    self._handle_dbapi_exception(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2125, in _exec_insertmany_context
+    dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) la valeur d'une clé dupliquée rompt la contrainte unique « atelier_activite_pkey »
+DETAIL:  La clé « (id)=(2) » existe déjà.
+[SQL: INSERT INTO atelier_activite (secteur, nom, description, type_atelier, capacite_defaut, heures_dispo_defaut_mois, duree_defaut_minutes, motifs_json, modele_docx_collectif, modele_docx_individuel, created_at, is_deleted, deleted_at) SELECT p0::VARCHAR ... 1144 characters truncated ... , p12, sen_counter) ORDER BY sen_counter RETURNING atelier_activite.id, atelier_activite.id AS id__1]
+[parameters: {'nom__0': 'S.O(rdi).S', 'deleted_at__0': None, 'motifs_json__0': None, 'created_at__0': datetime.datetime(2026, 1, 8, 11, 4, 30, 953213), 'modele_docx_individuel__0': None, 'secteur__0': 'Numérique', 'capacite_defaut__0': None, 'duree_defaut_minutes__0': None, 'is_deleted__0': False, 'heures_dispo_defaut_mois__0': None, 'description__0': None, 'modele_docx_collectif__0': None, 'type_atelier__0': 'INDIVIDUEL_MENSUEL', 'nom__1': 'Accès aux droits', 'deleted_at__1': None, 'motifs_json__1': None, 'created_at__1': datetime.datetime(2026, 1, 8, 11, 4, 30, 953213), 'modele_docx_individuel__1': None, 'secteur__1': 'Numérique', 'capacite_defaut__1': None, 'duree_defaut_minutes__1': None, 'is_deleted__1': False, 'heures_dispo_defaut_mois__1': None, 'description__1': None, 'modele_docx_collectif__1': None, 'type_atelier__1': 'INDIVIDUEL_MENSUEL'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR:app:Exception on /activite/ [GET]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2125, in _exec_insertmany_context
+    dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: la valeur d'une clé dupliquée rompt la contrainte unique « atelier_activite_pkey »
+DETAIL:  La clé « (id)=(3) » existe déjà.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\activite\routes.py", line 112, in index
+    _ensure_seed_ateliers(secteur)
+  File "I:\Users\admin\Desktop\app_gestion\app\activite\routes.py", line 93, in _ensure_seed_ateliers
+    db.session.commit()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1143, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1844, in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2133, in _exec_insertmany_context
+    self._handle_dbapi_exception(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2125, in _exec_insertmany_context
+    dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) la valeur d'une clé dupliquée rompt la contrainte unique « atelier_activite_pkey »
+DETAIL:  La clé « (id)=(3) » existe déjà.
+[SQL: INSERT INTO atelier_activite (secteur, nom, description, type_atelier, capacite_defaut, heures_dispo_defaut_mois, duree_defaut_minutes, motifs_json, modele_docx_collectif, modele_docx_individuel, created_at, is_deleted, deleted_at) SELECT p0::VARCHAR ... 1144 characters truncated ... , p12, sen_counter) ORDER BY sen_counter RETURNING atelier_activite.id, atelier_activite.id AS id__1]
+[parameters: {'nom__0': 'S.O(rdi).S', 'deleted_at__0': None, 'motifs_json__0': None, 'created_at__0': datetime.datetime(2026, 1, 8, 11, 4, 54, 863822), 'modele_docx_individuel__0': None, 'secteur__0': 'Numérique', 'capacite_defaut__0': None, 'duree_defaut_minutes__0': None, 'is_deleted__0': False, 'heures_dispo_defaut_mois__0': None, 'description__0': None, 'modele_docx_collectif__0': None, 'type_atelier__0': 'INDIVIDUEL_MENSUEL', 'nom__1': 'Accès aux droits', 'deleted_at__1': None, 'motifs_json__1': None, 'created_at__1': datetime.datetime(2026, 1, 8, 11, 4, 54, 863822), 'modele_docx_individuel__1': None, 'secteur__1': 'Numérique', 'capacite_defaut__1': None, 'duree_defaut_minutes__1': None, 'is_deleted__1': False, 'heures_dispo_defaut_mois__1': None, 'description__1': None, 'modele_docx_collectif__1': None, 'type_atelier__1': 'INDIVIDUEL_MENSUEL'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR:app:Exception on /admin/delete/4 [POST]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.ForeignKeyViolation: UPDATE ou DELETE sur la table « user » viole la contrainte de clé étrangère « participant_created_by_user_id_fkey » de la table « participant »
+DETAIL:  La clé (id)=(4) est toujours référencée à partir de la table « participant ».
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\admin\routes.py", line 57, in delete_user
+    db.session.commit()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 679, in execute
+    util.preloaded.orm_persistence.delete_obj(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 193, in delete_obj
+    _emit_delete_statements(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1471, in _emit_delete_statements
+    c = connection.execute(
+        ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.IntegrityError: (psycopg.errors.ForeignKeyViolation) UPDATE ou DELETE sur la table « user » viole la contrainte de clé étrangère « participant_created_by_user_id_fkey » de la table « participant »
+DETAIL:  La clé (id)=(4) est toujours référencée à partir de la table « participant ».
+[SQL: DELETE FROM "user" WHERE "user".id = %(id)s::INTEGER]
+[parameters: {'id': 4}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR:app:Exception on /admin/users [POST]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: la valeur d'une clé dupliquée rompt la contrainte unique « user_pkey »
+DETAIL:  La clé « (id)=(1) » existe déjà.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\admin\routes.py", line 37, in users
+    db.session.commit()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) la valeur d'une clé dupliquée rompt la contrainte unique « user_pkey »
+DETAIL:  La clé « (id)=(1) » existe déjà.
+[SQL: INSERT INTO "user" (email, password_hash, nom, role, secteur_assigne, created_at) VALUES (%(email)s::VARCHAR, %(password_hash)s::VARCHAR, %(nom)s::VARCHAR, %(role)s::VARCHAR, %(secteur_assigne)s::VARCHAR, %(created_at)s::TIMESTAMP WITHOUT TIME ZONE) RETURNING "user".id]
+[parameters: {'email': 'informatiquecgbcreil@gmail.com', 'password_hash': 'scrypt:32768:8:1$V2LJMVNFuRLTOzQt$19d48df0813c94941a50409ba041f688fdb58f242f23da8ae90b62962636577a23af7dd6b08ebdababf3aa1d5e39868fc529104bf9a7c7a6dfb85769a7a66d6c', 'nom': 'Antoine Vivien', 'role': 'responsable_secteur', 'secteur_assigne': 'Numérique', 'created_at': datetime.datetime(2026, 1, 8, 11, 17, 11, 655403)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR:app:Exception on /admin/users [POST]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: la valeur d'une clé dupliquée rompt la contrainte unique « user_pkey »
+DETAIL:  La clé « (id)=(2) » existe déjà.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\admin\routes.py", line 37, in users
+    db.session.commit()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) la valeur d'une clé dupliquée rompt la contrainte unique « user_pkey »
+DETAIL:  La clé « (id)=(2) » existe déjà.
+[SQL: INSERT INTO "user" (email, password_hash, nom, role, secteur_assigne, created_at) VALUES (%(email)s::VARCHAR, %(password_hash)s::VARCHAR, %(nom)s::VARCHAR, %(role)s::VARCHAR, %(secteur_assigne)s::VARCHAR, %(created_at)s::TIMESTAMP WITHOUT TIME ZONE) RETURNING "user".id]
+[parameters: {'email': 'informatiquecgbcreil@gmail.com', 'password_hash': 'scrypt:32768:8:1$zMuuyPAkPUzBUeUq$d819cf72a9d8d7d7205e9719bc4ce39c27805a2b2b37d8c33770dd30ce3cec5cdacbc230eeaf065c174b10145b2c1068e2bd1af14d04a5ab6497b09158862748', 'nom': 'Antoine Vivien', 'role': 'responsable_secteur', 'secteur_assigne': 'Numérique', 'created_at': datetime.datetime(2026, 1, 8, 11, 17, 16, 931842)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+ERROR:app:Exception on /bilans/lourds [GET]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\bilans\routes.py", line 76, in bilans_lourds
+    stats = compute_bilans_lourds(year, scope)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\bilans\services.py", line 699, in compute_bilans_lourds
+    q_eval = q_eval.join(Participant, Evaluation.participant_id == Participant.id).filter(Participant.secteur.in_(scope.secteurs))
+                                                                                          ^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Participant' has no attribute 'secteur'
+ERROR:app:Exception on /bilans/lourds [GET]
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\bilans\routes.py", line 76, in bilans_lourds
+    stats = compute_bilans_lourds(year, scope)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\bilans\services.py", line 699, in compute_bilans_lourds
+    q_eval = q_eval.join(Participant, Evaluation.participant_id == Participant.id).filter(Participant.secteur.in_(scope.secteurs))
+                                                                                          ^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Participant' has no attribute 'secteur'
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 145
+    @require_perm(\'subventions:edit\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 47, in create_app
+    from app.main.routes import bp as main_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\main\routes.py", line 318
+    @require_perm(\'subventions:delete\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 49, in create_app
+    from app.projets.routes import bp as projets_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\projets\routes.py", line 393
+    @require_perm(\'projets:delete\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+Traceback (most recent call last):
+  File "I:\Users\admin\Desktop\app_gestion\run_waitress.py", line 3, in <module>
+    from wsgi import app
+  File "I:\Users\admin\Desktop\app_gestion\wsgi.py", line 2, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "I:\Users\admin\Desktop\app_gestion\app\__init__.py", line 49, in create_app
+    from app.projets.routes import bp as projets_bp
+  File "I:\Users\admin\Desktop\app_gestion\app\projets\routes.py", line 393
+    @require_perm(\'projets:delete\')
+                   ^
+SyntaxError: unexpected character after line continuation character
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+I:\Users\admin\Desktop\app_gestion\.venv\Lib\site-packages\docxcompose\properties.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources

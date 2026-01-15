@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block body %}
+
+{% set annee_val = selected_annee if selected_annee is not none else '' %}
+{% set secteur_val = selected_secteur if selected_secteur else '' %}
+{% set projet_val = selected_projet_id if selected_projet_id else '' %}
+
+{% set stats_url = url_for('main.stats', annee=annee_val, secteur=secteur_val, projet_id=projet_val, embed=1) %}
+{% set bilan_url = url_for('main.bilan_global', annee=annee_val, secteur=secteur_val, projet_id=projet_val, embed=1) %}
+
+{% set stats_open_url = url_for('main.stats', annee=annee_val, secteur=secteur_val, projet_id=projet_val) %}
+{% set bilan_open_url = url_for('main.bilan_global', annee=annee_val, secteur=secteur_val, projet_id=projet_val) %}
+
+<div class="stack">
+  <div class="card">
+    <div class="inline" style="align-items:flex-start; justify-content:space-between">
+      <div>
+        <h1 style="margin-top:0">Stats &amp; bilans</h1>
+        <p class="muted" style="margin:0">Un seul écran, deux onglets. Les filtres s'appliquent partout.</p>
+      </div>
+      <div class="muted" style="max-width:520px; font-size:13px; text-align:right">
+        Astuce : commence par choisir l’année / le secteur / le projet. Ensuite, navigue entre <strong>Stats</strong> et <strong>Bilan</strong> sans perdre ton contexte.
+      </div>
+    </div>
+
+    <form class="inline" method="get" action="{{ url_for('main.stats_bilans') }}" style="margin-top:12px; gap:12px; flex-wrap:wrap">
+      <div>
+        <div class="muted" style="font-size:12px; margin-bottom:6px">Année</div>
+        <select class="in" name="annee" style="min-width:140px">
+          <option value="">-- toutes --</option>
+          {% for a in annees %}
+            <option value="{{ a }}" {% if selected_annee == a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <div class="muted" style="font-size:12px; margin-bottom:6px">Secteur</div>
+        <select class="in" name="secteur" style="min-width:170px" {% if not can('scope:all_secteurs') %}disabled{% endif %}>
+          <option value="">-- tous --</option>
+          {% for s in secteurs %}
+            <option value="{{ s }}" {% if selected_secteur == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+        {% if not can('scope:all_secteurs') %}
+          <input type="hidden" name="secteur" value="{{ current_user.secteur_assigne }}">
+        {% endif %}
+      </div>
+
+      <div>
+        <div class="muted" style="font-size:12px; margin-bottom:6px">Projet</div>
+        <select class="in" name="projet_id" style="min-width:260px">
+          <option value="">-- tous --</option>
+          {% for p in projets %}
+            <option value="{{ p.id }}" {% if selected_projet_id == p.id %}selected{% endif %}>{{ p.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="align-self:flex-end">
+        <button class="btn ok" type="submit">Appliquer</button>
+        <a class="btn" href="{{ url_for('main.stats_bilans') }}">Reset</a>
+      </div>
+
+      <div class="right" style="margin-left:auto; align-self:flex-end">
+        <a class="btn" href="{{ stats_open_url }}">Ouvrir Stats ↗</a>
+        <a class="btn" href="{{ bilan_open_url }}">Ouvrir Bilan ↗</a>
+      </div>
+    </form>
+
+    <div class="inline" style="margin-top:12px; gap:10px">
+      <button class="pill active" type="button" id="tabStats">📊 Stats</button>
+      <button class="pill" type="button" id="tabBilan">🧾 Bilan</button>
+    </div>
+
+    <p class="muted" style="margin-top:10px; font-size:13px">
+      Les vues ci-dessous sont chargées en mode intégré. Pour l'instant, la vue “Stats” ne filtre pas encore par projet : ça arrive à l'étape suivante.
+    </p>
+
+    <div id="panelStats" style="margin-top:12px">
+      <iframe src="{{ stats_url }}" style="width:100%; height:70vh; border:0; border-radius:14px; background:var(--surface-soft)"></iframe>
+    </div>
+    <div id="panelBilan" style="margin-top:12px; display:none">
+      <iframe src="{{ bilan_url }}" style="width:100%; height:70vh; border:0; border-radius:14px; background:var(--surface-soft)"></iframe>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  const tabStats = document.getElementById('tabStats');
+  const tabBilan = document.getElementById('tabBilan');
+  const panelStats = document.getElementById('panelStats');
+  const panelBilan = document.getElementById('panelBilan');
+
+  function activate(which){
+    if(which === 'stats'){
+      tabStats.classList.add('active');
+      tabBilan.classList.remove('active');
+      panelStats.style.display = '';
+      panelBilan.style.display = 'none';
+    }else{
+      tabBilan.classList.add('active');
+      tabStats.classList.remove('active');
+      panelBilan.style.display = '';
+      panelStats.style.display = 'none';
+    }
+  }
+
+  tabStats.addEventListener('click', ()=>activate('stats'));
+  tabBilan.addEventListener('click', ()=>activate('bilan'));
+})();
+</script>
+
+{% endblock %}

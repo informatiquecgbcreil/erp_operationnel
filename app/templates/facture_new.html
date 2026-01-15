@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="stack">
+    <h1>Nouvelle facture</h1>
+
+    <div class="card">
+      <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="grid two">
+          {% if not is_resp %}
+            <div>
+              <label>Secteur principal</label>
+              <input name="secteur_principal" placeholder="ex : Numérique" value="{{ secteur_default }}" required>
+              <div class="help">Pour les responsables secteur : champ masqué (auto).</div>
+            </div>
+          {% else %}
+            <input type="hidden" name="secteur_principal" value="{{ secteur_default }}">
+          {% endif %}
+
+          <div>
+            <label>Date de facture</label>
+            <input type="date" name="date_facture">
+          </div>
+
+          <div>
+            <label>Fournisseur</label>
+            <input name="fournisseur" placeholder="ex : LDLC / Amazon / Boulanger">
+          </div>
+
+          <div>
+            <label>Référence facture</label>
+            <input name="reference_facture" placeholder="ex : FA-2026-00123">
+          </div>
+
+          <div>
+            <label>Fichier (pdf / image)</label>
+            <input type="file" name="facture_file" accept=".pdf,.png,.jpg,.jpeg,.webp">
+            <div class="help">Optionnel. Tu peux l’ajouter plus tard si tu veux.</div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+        <button class="btn ok" type="submit">Créer la facture</button>
+        <a class="btn" href="{{ url_for('inventaire.factures_list') }}">Annuler</a>
+      </form>
+    </div>
+  </div>
+{% endblock %}

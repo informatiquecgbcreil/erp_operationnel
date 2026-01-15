@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+
+  <div class="card">
+    <h1>Équipe</h1>
+    <p class="muted">Réservé à <strong>admin_tech</strong>. Création / suppression d’utilisateurs.</p>
+  </div>
+
+  <div class="grid two">
+
+    <div class="card">
+      <h2>Créer un utilisateur</h2>
+
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="row two">
+          <div>
+            <label>Email</label>
+            <input name="email" type="email" required>
+          </div>
+          <div>
+            <label>Nom</label>
+            <input name="nom" required>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="row two">
+          <div>
+            <label>Rôle</label>
+            <select name="role" id="roleSelect" required>
+              <option value="">— choisir —</option>
+              {% for r in roles %}
+                <option value="{{ r.code }}">{{ r.label or r.code }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label>Secteur assigné (si responsable)</label>
+            <select name="secteur_assigne" id="secteurSelect">
+              <option value="">—</option>
+              {% for sec in secteurs %}
+                <option value="{{ sec }}">{{ sec }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="row">
+          <div>
+            <label>Mot de passe</label>
+            <input name="password" type="password" required>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+        <button class="btn ok" type="submit">Créer</button>
+      </form>
+
+      <div class="spacer"></div>
+      <p class="muted">Conseil : mets un secteur uniquement si rôle = responsable_secteur.</p>
+    </div>
+
+    <div class="card">
+      <h2>Utilisateurs existants</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th>Secteur</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td><strong>{{ u.nom }}</strong></td>
+                <td class="muted">{{ u.email }}</td>
+                <td>{{ u.role_codes|join(', ') }}</td>
+                <td class="muted">{{ u.secteur_assigne or "—" }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn danger" type="submit" onclick="return confirm('Supprimer cet utilisateur ?')">Supprimer</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+            {% if users|length == 0 %}
+              <tr><td colspan="5" class="muted">Aucun utilisateur.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const roleSelect = document.getElementById("roleSelect");
+  const secteurSelect = document.getElementById("secteurSelect");
+
+  function refresh(){
+    const isResp = roleSelect.value === "responsable_secteur";
+    secteurSelect.disabled = !isResp;
+    if(!isResp) secteurSelect.value = "";
+  }
+  roleSelect.addEventListener("change", refresh);
+  refresh();
+</script>
+
+{% endblock %}

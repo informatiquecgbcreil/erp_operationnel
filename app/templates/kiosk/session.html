@@ -1,0 +1,270 @@
+{% extends 'kiosk/base.html' %}
+{% block body %}
+  <div class="card">
+    <div class="row" style="justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h1 style="margin:0;">{{ session_label }}</h1>
+        <div class="muted">Code session : <strong>{{ session.kiosk_pin or '—' }}</strong></div>
+      </div>
+      <div class="row" style="gap:10px; flex-wrap:wrap;">
+        <a class="btn" href="{{ url_for('kiosk.kiosk_home') }}">Changer de session</a>
+      </div>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="card">
+        {% for cat,msg in messages %}
+          <div class="alert {{ cat }}" style="margin:6px 0;">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% if message_ok %}
+    <div class="card">
+      <div class="alert success" style="margin:0; font-size:18px;"><strong>{{ message_ok }}</strong></div>
+      <div class="muted" style="margin-top:8px;">Tu peux fermer cette page, ou émarger quelqu'un d'autre.</div>
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <h2 style="margin-top:0;">Émarger</h2>
+
+    <form method="post" id="emargeForm" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="emarger">
+      <input type="hidden" name="signature_data" id="signature_data">
+      <input type="hidden" name="participant_id" id="participant_id">
+
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <label>Nom (recherche)</label>
+          <input class="in" id="search" placeholder="Tape les 2-3 premières lettres" autocomplete="off">
+          <div id="results" class="card" style="display:none; padding:10px; margin-top:8px;"></div>
+          <div class="muted" style="margin-top:6px;">Clique sur ton nom dans la liste.</div>
+        </div>
+
+        <div>
+          <label>Participant choisi</label>
+          <div id="chosen" class="in" style="display:flex; align-items:center; min-height:44px;">—</div>
+          <div class="muted" style="margin-top:6px;">
+            Nouveau ? <a href="#" id="toggleNew">Créer un participant</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloc "Nouveau participant" déplacé hors du formulaire d'émargement (HTML interdit les formulaires imbriqués) -->
+
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+        <div>
+          <label>Motif</label>
+          <select class="in" name="motif" id="motif">
+            <option value="">—</option>
+            {% for m in motifs %}
+              <option value="{{ m }}">{{ m }}</option>
+            {% endfor %}
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div>
+          <label>Si autre, préciser</label>
+          <input class="in" type="text" name="motif_autre" id="motif_autre" placeholder="...">
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <label>Signature</label>
+      <div style="border:1px solid var(--border); border-radius:14px; padding:10px; background: var(--surface-soft);">
+        <canvas id="sig" width="700" height="180" style="width:100%; height:180px; background:white; border-radius:10px;"></canvas>
+        <div class="row" style="gap:10px; margin-top:10px; flex-wrap:wrap;">
+          <button class="btn" type="button" id="clearSig">Effacer</button>
+          <button class="btn" type="submit">Valider l’émargement</button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div id="newParticipant" style="display:none; margin-top:16px;">
+    <div class="card" style="padding:14px;">
+      <h3 style="margin:0 0 10px 0;">Nouveau participant</h3>
+      <div class="muted" style="margin-bottom:12px;">Crée la personne, puis re-clique sur son nom dans la recherche pour signer.</div>
+      <form method="post" id="newParticipantForm" autocomplete="off">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="add_participant">
+        <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label>Nom</label>
+            <input class="in" name="nom" required>
+          </div>
+          <div>
+            <label>Prénom</label>
+            <input class="in" name="prenom" required>
+          </div>
+          <div>
+            <label>Ville</label>
+            <input class="in" name="ville" placeholder="Creil">
+          </div>
+          <div>
+            <label>Quartier (si Creil)</label>
+            <select class="in" name="quartier_id">
+              <option value="">—</option>
+              {% for q in quartiers %}
+                <option value="{{ q.id }}">{{ q.nom }}{% if q.is_qpv %} (QPV){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+          <div>
+            <label>Type de public</label>
+            <select class="in" name="type_public">
+              <option value="H" selected>H</option>
+              <option value="S">S</option>
+              <option value="B">B</option>
+              <option value="A">A</option>
+              <option value="P">P</option>
+            </select>
+          </div>
+          <div class="muted" style="align-self:end;">(Optionnel — si tu ne sais pas : laisse H)</div>
+        </div>
+        <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+          <div>
+            <label>Email (optionnel)</label>
+            <input class="in" name="email">
+          </div>
+          <div>
+            <label>Téléphone (optionnel)</label>
+            <input class="in" name="telephone">
+          </div>
+        </div>
+        <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+          <div>
+            <label>Date de naissance</label>
+            <input class="in" type="date" name="date_naissance" placeholder="YYYY-MM-DD">
+          </div>
+          <div>
+            <label>Genre</label>
+            <select class="in" name="genre">
+              <option value="">—</option>
+              <option value="Femme">Femme</option>
+              <option value="Homme">Homme</option>
+              <option value="Autre">Autre</option>
+              <option value="Préférez ne pas répondre">Préférez ne pas répondre</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="gap:10px; margin-top:12px; flex-wrap:wrap;">
+          <button class="btn" type="submit">Créer le participant</button>
+          <button class="btn" type="button" id="cancelNew">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const token = "{{ token }}";
+  const search = document.getElementById('search');
+  const results = document.getElementById('results');
+  const chosen = document.getElementById('chosen');
+  const pid = document.getElementById('participant_id');
+  const toggleNew = document.getElementById('toggleNew');
+  const newBlock = document.getElementById('newParticipant');
+  const cancelNew = document.getElementById('cancelNew');
+
+  const highlightId = {{ (highlight or 'null')|tojson }};
+  const highlightLabel = {{ (highlight_label or 'null')|tojson }};
+  if(highlightId && highlightLabel){
+    pid.value = highlightId;
+    chosen.textContent = highlightLabel;
+  }
+
+  function showResults(list){
+    results.innerHTML = '';
+    if(!list.length){ results.style.display='none'; return; }
+    results.style.display = 'block';
+    list.forEach(item => {
+      const b = document.createElement('button');
+      b.type='button';
+      b.className='btn';
+      b.style.margin='6px 6px 0 0';
+      b.textContent=item.label;
+      b.addEventListener('click', () => {
+        pid.value = item.id;
+        chosen.textContent = item.label;
+        results.style.display='none';
+        newBlock.style.display='none';
+      });
+      results.appendChild(b);
+    });
+  }
+
+  let t = null;
+  search.addEventListener('input', () => {
+    const q = search.value.trim();
+    if(t) clearTimeout(t);
+    if(q.length < 2){ showResults([]); return; }
+    t = setTimeout(async () => {
+      const r = await fetch(`{{ url_for('kiosk.kiosk_search', token='__TOKEN__') }}`.replace('__TOKEN__', token) + `?q=${encodeURIComponent(q)}`);
+      if(!r.ok){ showResults([]); return; }
+      const data = await r.json();
+      showResults(data.results || []);
+    }, 250);
+  });
+
+  toggleNew.addEventListener('click', (e) => {
+    e.preventDefault();
+    newBlock.style.display = (newBlock.style.display==='none') ? 'block' : 'none';
+  });
+  cancelNew.addEventListener('click', () => {
+    newBlock.style.display='none';
+  });
+
+  // Signature canvas
+  const canvas = document.getElementById('sig');
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+  let last = null;
+
+  function pos(e){
+    const r = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+    return {x: x * (canvas.width/r.width), y: y * (canvas.height/r.height)};
+  }
+  function start(e){ drawing = true; last = pos(e); e.preventDefault(); }
+  function move(e){
+    if(!drawing) return;
+    const p = pos(e);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(last.x, last.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    last = p;
+    e.preventDefault();
+  }
+  function end(e){ drawing = false; last = null; e.preventDefault(); }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end, {passive:false});
+
+  document.getElementById('clearSig').addEventListener('click', () => {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  });
+
+  document.getElementById('emargeForm').addEventListener('submit', () => {
+    document.getElementById('signature_data').value = canvas.toDataURL('image/png');
+  });
+})();
+</script>
+{% endblock %}

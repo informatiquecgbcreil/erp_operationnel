@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="card">
+  <h1>Accès refusé (403)</h1>
+  <p class="muted">
+    Tu n’as pas les droits nécessaires pour accéder à cette page.
+  </p>
+
+  <div class="spacer"></div>
+
+  <div class="inline">
+    <a class="btn" href="{{ url_for('main.dashboard') }}">Retour dashboard</a>
+    <a class="btn" href="{{ url_for('main.controle') }}">Contrôle</a>
+  </div>
+
+  <div class="spacer"></div>
+
+  <p class="muted" style="font-size:13px;">
+    Si tu penses que c’est une erreur : contacte l’administrateur technique.
+  </p>
+</div>
+
+{% endblock %}

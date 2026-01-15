@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  <div class="card">
+    <h1 style="margin:0 0 8px 0;">Dépenses</h1>
+    <p style="margin:0 0 16px 0; opacity:.85;">
+      Deux entrées simples : consulter toutes les dépenses, ou en créer une nouvelle.
+    </p>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <a class="btn" href="{{ url_for('budget.depenses_list') }}" style="padding:12px 16px;">
+        📋 Liste des dépenses
+      </a>
+      <a class="btn" href="{{ url_for('budget.depense_new') }}" style="padding:12px 16px;">
+        ➕ Nouvelle dépense
+      </a>
+    </div>
+
+    <hr style="margin:18px 0; opacity:.25;">
+
+    <div style="font-size:14px; opacity:.85;">
+      <strong>Astuce :</strong> si tu veux voir uniquement les dépenses d’une subvention, utilise le filtre “Subvention” dans la liste.
+    </div>
+  </div>
+{% endblock %}

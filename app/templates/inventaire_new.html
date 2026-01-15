@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="stack">
+    <div class="inline">
+      <h1 style="margin:0">Nouvelle entrée inventaire</h1>
+      <a class="btn" href="{{ url_for('inventaire_materiel.list_items') }}">⬅ Retour</a>
+    </div>
+
+    <div class="card">
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="grid2">
+          <div>
+            <label>Secteur</label>
+{% if not can('scope:all_secteurs') %}
+  <input type="text" name="secteur" value="{{ default_secteur }}" readonly>
+  <input type="hidden" name="secteur" value="{{ default_secteur }}">
+{% else %}
+  <select name="secteur" required>
+    <option value="">-- Choisir --</option>
+    {% for sec in (secteur_choices or SECTEURS or []) %}
+      <option value="{{ sec }}" {% if sec == default_secteur %}selected{% endif %}>{{ sec }}</option>
+    {% endfor %}
+  </select>
+{% endif %}
+          </div>
+          <div>
+            <label>ID interne</label>
+            <input type="text" value="Auto (CODE-MM-YYYY-0001)" readonly>
+            <div class="muted" style="font-size:12px">Basé sur la date d'entrée (ou aujourd'hui si vide).</div>
+          </div>
+          <div>
+            <label>Catégorie</label>
+            <input type="text" name="categorie" placeholder="Ex: Informatique / Audio / Mobilier">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label>Désignation *</label>
+            <input type="text" name="designation" placeholder="Ex: Écran 24\"" required>
+          </div>
+          <div class="grid2" style="grid-template-columns:1fr 1fr; gap:10px">
+            <div>
+              <label>Quantité</label>
+              <input type="number" name="quantite" value="1" min="1">
+            </div>
+            <div>
+              <label>État</label>
+              <select name="etat">
+                <option value="OK">OK</option>
+                <option value="A réparer">A réparer</option>
+                <option value="HS">HS</option>
+                <option value="Donné">Donné</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label>Marque</label>
+            <input type="text" name="marque" placeholder="Ex: Dell">
+          </div>
+          <div>
+            <label>Modèle</label>
+            <input type="text" name="modele" placeholder="Ex: P2419H">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label>Numéro de série</label>
+            <input type="text" name="numero_serie">
+          </div>
+          <div>
+            <label>Localisation</label>
+            <input type="text" name="localisation" placeholder="Ex: Salle info / Bureau">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label>Valeur unitaire (optionnel)</label>
+            <input type="number" step="0.01" name="valeur_unitaire" placeholder="Ex: 149.90">
+          </div>
+          <div>
+            <label>Date d’entrée</label>
+            <input type="date" name="date_entree">
+          </div>
+        </div>
+
+        <div>
+          <label>Notes</label>
+          <textarea name="notes" rows="4" placeholder="Prêt, garantie, contexte..."></textarea>
+        </div>
+
+        <div class="inline" style="justify-content:flex-end; margin-top:10px">
+          <button class="btn ok" type="submit">Créer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

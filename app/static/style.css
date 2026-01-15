@@ -1,0 +1,203 @@
+/* =========================================================
+   APP GESTION - THEME LIGHT/DARK
+   - Par défaut : thème sombre
+   - Pour forcer clair : <html data-theme="light">
+   - Pour forcer sombre : <html data-theme="dark">
+   ========================================================= */
+
+/* ---------- 1) TOKENS (couleurs variables) ---------- */
+:root{
+  /* on laisse le navigateur annoncer qu'on supporte les 2 */
+  color-scheme: light dark;
+
+  /* Thème par défaut = DARK */
+  --bg: #0b1020;
+  --surface: rgba(18,26,51,.78);
+  --surface-strong: #121a33;
+  --border: rgba(255,255,255,.10);
+  --border-soft: rgba(255,255,255,.12);
+
+  --text: #e8ecff;
+  --muted: #9aa6d6;
+
+  --accent: #6aa5ff;
+  --danger: #ff6a6a;
+  --ok: #52d17c;
+  --warn: #ffcc66;
+
+  /* Inputs / selects */
+  --input-bg: rgba(255,255,255,.05);
+  --input-text: var(--text);
+  --input-border: var(--border-soft);
+
+  /* Dropdown options */
+  --option-bg: var(--surface-strong);
+  --option-text: var(--text);
+
+  /* Focus ring */
+  --focus: rgba(106,165,255,.35);
+}
+
+/* ---------- 2) THEME LIGHT ---------- */
+html[data-theme="light"]{
+  color-scheme: light;
+
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-strong: #ffffff;
+  --border: rgba(15,23,42,.12);
+  --border-soft: rgba(15,23,42,.16);
+
+  --text: #0f172a;
+  --muted: #475569;
+
+  --accent: #2563eb;
+  --danger: #dc2626;
+  --ok: #16a34a;
+  --warn: #d97706;
+
+  --input-bg: #ffffff;
+  --input-text: #0f172a;
+  --input-border: rgba(15,23,42,.18);
+
+  --option-bg: #ffffff;
+  --option-text: #0f172a;
+
+  --focus: rgba(37,99,235,.25);
+}
+
+/* ---------- 3) THEME DARK (optionnel explicite) ---------- */
+html[data-theme="dark"]{
+  color-scheme: dark;
+}
+
+/* ---------- 4) BASE ---------- */
+*{ box-sizing: border-box; }
+
+body{
+  margin:0;
+  font-family: system-ui, "Segoe UI", Roboto, Arial;
+  background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--bg);
+  color: var(--text);
+}
+
+/* Liens */
+a{ color: inherit; text-decoration: none; }
+a:hover{ text-decoration: underline; }
+
+/* ---------- 5) INPUTS / SELECTS / TEXTAREA (FIX GLOBAL) ---------- */
+input, select, textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  outline:none;
+}
+
+/* IMPORTANT : options des select (le bug blanc sur blanc) */
+select option,
+select optgroup{
+  background: var(--option-bg);
+  color: var(--option-text);
+}
+
+/* focus accessible */
+input:focus, select:focus, textarea:focus{
+  border-color: color-mix(in srgb, var(--accent) 65%, transparent);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+/* placeholders (cohérents sur les 2 thèmes) */
+::placeholder{
+  color: color-mix(in srgb, var(--muted) 80%, transparent);
+}
+
+/* ---------- 6) BOUTONS ---------- */
+.btn, button{
+  cursor:pointer;
+  border:1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  display:inline-block;
+}
+
+.btn:hover, button:hover{
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+
+.btn.ok{ border-color: color-mix(in srgb, var(--ok) 55%, var(--border)); }
+.btn.warn{ border-color: color-mix(in srgb, var(--warn) 55%, var(--border)); }
+.btn.danger{ border-color: color-mix(in srgb, var(--danger) 55%, var(--border)); }
+
+/* ---------- 7) TABLES (lisibles partout) ---------- */
+.tablewrap{
+  width:100%;
+  overflow:auto;
+  border-radius:14px;
+  border:1px solid var(--border);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:760px;
+}
+
+th, td{
+  padding:10px 10px;
+  border-bottom:1px solid color-mix(in srgb, var(--border) 85%, transparent);
+  vertical-align:top;
+}
+
+th{
+  text-align:left;
+  color: var(--muted);
+  font-weight:700;
+  font-size:13px;
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+}
+
+/* ---------- 8) UI HELPERS ---------- */
+.muted{ color: var(--muted); }
+
+/* (Optionnel) petit switch qui peut être dans le layout */
+.theme-switch{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.theme-switch .pill{
+  padding:8px 12px;
+  border:1px solid var(--border-soft);
+  border-radius:999px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  cursor:pointer;
+}
+.theme-switch .pill:hover{
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+
+
+/* Empêche le dashboard de déborder horizontalement */
+.dashboard, .stats-container, .content, main {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Conteneur des cards: faut que ça wrap */
+.cards, .card-grid, .grid, .dashboard-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: stretch;
+}
+
+
+
+/* --- RBAC small UI bits --- */
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.8em;opacity:.9;border:1px solid rgba(255,255,255,.15)}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.8em;opacity:.9;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10)}

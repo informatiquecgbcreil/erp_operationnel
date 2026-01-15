@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="stack">
+
+  <div class="card">
+    {% include "_projet_budget_header.html" %}
+
+    <div class="spacer"></div>
+
+    <form method="post" class="row three">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input name="financeur" placeholder="Financeur (ex: CAF Oise)" required>
+      <select name="categorie">
+        <option value="etat">État</option>
+        <option value="region">Région</option>
+        <option value="departement">Département</option>
+        <option value="commune">Commune / Agglo</option>
+        <option value="caf">CAF</option>
+        <option value="europe">Europe</option>
+        <option value="prive">Privé / Fondation</option>
+        <option value="autofinancement">Autofinancement</option>
+        <option value="vente_presta">Vente / presta</option>
+        <option value="autre" selected>Autre</option>
+      </select>
+      <select name="statut">
+        <option value="prevu">Prévu</option>
+        <option value="demande">Demandé</option>
+        <option value="accorde">Accordé</option>
+        <option value="partiel">Partiel</option>
+        <option value="refuse">Refusé</option>
+      </select>
+      <input name="montant_demande" type="number" step="0.01" placeholder="Demandé (€)" style="max-width:170px">
+      <input name="montant_accorde" type="number" step="0.01" placeholder="Accordé (€)" style="max-width:170px">
+      <input name="montant_recu" type="number" step="0.01" placeholder="Reçu (€)" style="max-width:170px">
+      <input name="reference_dossier" placeholder="Référence dossier (option)" style="max-width:220px">
+      <input name="commentaire" placeholder="Commentaire (option)">
+      <button class="btn ok" type="submit">Ajouter</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Financeur</th>
+            <th>Catégorie</th>
+            <th>Statut</th>
+            <th>Demandé</th>
+            <th>Accordé</th>
+            <th>Reçu</th>
+            <th>Ventilé</th>
+            <th>Reste à ventiler</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for p in produits %}
+          <tr>
+            <td>{{ p.financeur }}</td>
+            <td>{{ p.categorie }}</td>
+            <td>{{ p.statut }}</td>
+            <td>{{ "%.2f"|format(p.montant_demande or 0) }}€</td>
+            <td>{{ "%.2f"|format(p.montant_accorde or 0) }}€</td>
+            <td>{{ "%.2f"|format(p.montant_recu or 0) }}€</td>
+            <td>{{ "%.2f"|format(p.ventile or 0) }}€</td>
+            <td>{{ "%.2f"|format(p.reste_a_ventiler or 0) }}€</td>
+            <td style="white-space:nowrap">
+              <a class="btn" href="{{ url_for('projets.projet_budget_produit_edit', projet_id=projet.id, produit_id=p.id) }}">✏️</a>
+              <form method="post" action="{{ url_for('projets.projet_budget_produit_delete', projet_id=projet.id, produit_id=p.id) }}" style="display:inline" onsubmit="return confirm('Supprimer ce produit/financeur ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn" type="submit">🗑️</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="9" class="muted">Aucun produit/financeur pour le moment.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

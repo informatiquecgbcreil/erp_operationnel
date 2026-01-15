@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+  <h1>🔐 Sécurité interne (RBAC)</h1>
+  <p>Gère les rôles, permissions, et l’attribution aux utilisateurs.</p>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a class="btn" href="{{ url_for('admin.rbac_roles') }}">Rôles & permissions</a>
+    <a class="btn" href="{{ url_for('admin.rbac_users') }}">Attribution aux utilisateurs</a>
+  </div>
+</div>
+{% endblock %}

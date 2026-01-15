@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+  {% if role %}
+    <h1>✏️ Rôle : {{ role.name }}</h1>
+  {% else %}
+    <h1>🆕 Nouveau rôle</h1>
+  {% endif %}
+
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+      <div>
+        <label>Nom (identifiant)</label>
+        <input class="input" name="name" value="{{ role.name if role else '' }}" {% if role and role.is_system %}disabled{% endif %}>
+        {% if role and role.is_system %}
+          <small style="opacity:.75;">Rôle système : nom verrouillé.</small>
+        {% endif %}
+      </div>
+
+      <div>
+        <label>Label (affichage)</label>
+        <input class="input" name="label" value="{{ role.label if role else '' }}">
+      </div>
+    </div>
+
+    <hr style="margin:18px 0; opacity:.25;">
+
+    <h2 style="margin:0 0 10px 0;">Permissions</h2>
+    <p style="opacity:.8; margin:0 0 10px 0;">
+      Coche ce que le rôle a le droit de faire. (Tu pourras affiner plus tard.)
+    </p>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:12px;">
+      {% for perm in permissions %}
+        <label style="display:flex; gap:10px; align-items:flex-start; border:1px solid rgba(255,255,255,.08); padding:10px; border-radius:10px;">
+          <input type="checkbox" name="perms" value="{{ perm }}" {% if perm in selected %}checked{% endif %} style="margin-top:2px;">
+          <div>
+            <div><b>{{ perm }}</b></div>
+            <div style="opacity:.75; font-size:.92em;">{{ perm }}</div>
+          </div>
+        </label>
+      {% endfor %}
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+      <button class="btn" type="submit">Enregistrer</button>
+      <a class="btn" href="{{ url_for('admin.rbac_roles') }}">Retour</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

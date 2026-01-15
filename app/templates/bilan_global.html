@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="card">
+    <h1>Bilan global</h1>
+    <p class="muted">Filtre par année / secteur / projet. Idéal pour sortir un récap global “financeurs”.</p>
+
+    <form method="GET" class="grid two">
+      <div>
+        <label>Année</label>
+        <select name="annee" >
+          <option value="">-- toutes --</option>
+          {% for a in all_annees %}
+            <option value="{{ a }}" {% if selected_annee == a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Secteur</label>
+        <select name="secteur" >
+          <option value="">-- tous --</option>
+          {% for s in all_secteurs %}
+            <option value="{{ s }}" {% if selected_secteur == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Projet</label>
+        <select name="projet_id" >
+          <option value="">-- tous --</option>
+          {% for p in projets %}
+            <option value="{{ p.id }}" {% if selected_projet_id and (selected_projet_id|string)==(p.id|string) %}selected{% endif %}>{{ p.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <noscript><button class="btn ok" type="submit">Filtrer</button></noscript>
+    </form>
+
+    <div class="spacer"></div>
+
+    <div class="kpi">
+      <div class="box"><div class="muted">Demandé</div><div class="v">{{ "%.2f"|format(total_demande or 0) }}€</div></div>
+      <div class="box"><div class="muted">Attribué</div><div class="v">{{ "%.2f"|format(total_attribue or 0) }}€</div></div>
+      <div class="box"><div class="muted">Reçu</div><div class="v">{{ "%.2f"|format(total_recu or 0) }}€</div></div>
+      <div class="box"><div class="muted">Engagé</div><div class="v">{{ "%.2f"|format(total_engage or 0) }}€</div></div>
+      <div class="box"><div class="muted">Reste</div><div class="v">{{ "%.2f"|format(total_reste or 0) }}€</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Subventions</h2>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Exercice</th>
+            <th>Secteur</th>
+            <th>Nom</th>
+            <th>Reçu</th>
+            <th>Engagé</th>
+            <th>Reste</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in subs %}
+            <tr>
+              <td class="muted">{{ s.annee_exercice }}</td>
+              <td class="muted">{{ s.secteur }}</td>
+              <td><strong>{{ s.nom }}</strong></td>
+              <td>{{ "%.2f"|format(s.montant_recu or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.total_engage or 0) }}€</td>
+              <td>{{ "%.2f"|format(s.total_reste or 0) }}€</td>
+              <td>
+                <a class="btn" href="{{ url_for('main.subvention_bilan', subvention_id=s.id) }}">Bilan</a>
+                <a class="btn" href="{{ url_for('main.subvention_pilotage', subvention_id=s.id) }}">Pilotage</a>
+              </td>
+            </tr>
+          {% endfor %}
+          {% if subs|length == 0 %}
+            <tr><td colspan="7" class="muted">Aucune subvention pour ces filtres.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

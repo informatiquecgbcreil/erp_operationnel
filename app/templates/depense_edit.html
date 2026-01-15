@@ -1,0 +1,204 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="stack">
+  <div class="card">
+    <h1>Éditer dépense</h1>
+    <p><strong>{{ sub.nom }}</strong> · Ligne : {{ ligne.compte }} · {{ ligne.libelle }}</p>
+
+    <div class="kpi">
+      <div class="box"><div class="muted">Alloué (ligne réel)</div><div class="v">{{ "%.2f"|format(alloue) }}€</div></div>
+      <div class="box"><div class="muted">Engagé (ligne)</div><div class="v">{{ "%.2f"|format(engage) }}€</div></div>
+      <div class="box"><div class="muted">Reste (ligne)</div><div class="v">{{ "%.2f"|format(reste) }}€</div></div>
+      <div class="box"><div class="muted">Cette dépense</div><div class="v">{{ "%.2f"|format(dep.montant or 0) }}€</div></div>
+      <div class="box"><div class="muted">Type</div><div class="v">{{ dep.type_depense }}</div></div>
+      <div class="box"><div class="muted">Date</div><div class="v">{{ dep.date_paiement or "-" }}</div></div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>Modifier</h2>
+
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="update">
+
+        <div class="row two">
+          <div><label>Libellé</label><input name="libelle" value="{{ dep.libelle }}"></div>
+          <div><label>Montant (€)</label><input name="montant" type="number" step="0.01" value="{{ dep.montant or 0 }}"></div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="row two">
+          <div>
+            <label>Type</label>
+            <select name="type_depense">
+              {% for t in ["Fonctionnement","Investissement","Prestations","Déplacements","Autre"] %}
+                <option {% if dep.type_depense==t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div><label>Date paiement</label><input name="date_paiement" type="date" value="{{ dep.date_paiement }}"></div>
+        </div>
+
+        <div class="spacer"></div>
+        <button class="btn ok" type="submit">Enregistrer</button>
+      </form>
+
+      <div class="spacer"></div>
+
+      <div class="inline">
+        <a class="btn" href="{{ url_for('main.subvention_pilotage', subvention_id=sub.id) }}">Retour pilotage</a>
+
+        <!-- ✅ suppression via endpoint dédié -->
+        <form method="POST" action="{{ url_for('budget.depense_delete', depense_id=dep.id) }}"
+              onsubmit="return confirm('Supprimer cette dépense ? (Action irréversible)');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn danger" type="submit">Supprimer la dépense</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Justificatifs</h2>
+      <p class="muted">Facultatif pour l’instant, mais conseillé. (PDF / images / Office)</p>
+
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="upload_doc">
+        <input type="file" name="document" required>
+        <div class="spacer"></div>
+        <button class="btn ok" type="submit">Uploader</button>
+      </form>
+
+      <div class="spacer"></div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Fichier</th><th>Date</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for doc in dep.documents %}
+              <tr>
+                <td>{{ doc.original_name }}</td>
+                <td class="muted">{{ doc.uploaded_at }}</td>
+                <td class="inline">
+                  <a class="btn" href="{{ url_for('budget.depense_doc_download', doc_id=doc.id) }}">Télécharger</a>
+                  <form method="POST" action="{{ url_for('budget.depense_doc_delete', doc_id=doc.id) }}"
+                        onsubmit="return confirm('Supprimer ce justificatif ?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn danger" type="submit">Supprimer</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+            {% if dep.documents|length == 0 %}
+              <tr><td colspan="3" class="muted">Aucun justificatif.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Inventaire (optionnel)</h2>
+    <p class="muted">Associer cette dépense à une entrée d'inventaire existante ou créer une nouvelle fiche matériel.</p>
+
+    {% if inventaire_items %}
+      <div class="tablewrap" style="margin-bottom:14px">
+        <table>
+          <thead>
+            <tr>
+              <th>ID interne</th>
+              <th>Désignation</th>
+              <th>État</th>
+              <th>Localisation</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in inventaire_items %}
+              <tr>
+                <td><strong>{{ it.id_interne }}</strong></td>
+                <td>{{ it.designation }}</td>
+                <td><span class="badge">{{ it.etat }}</span></td>
+                <td>{{ it.localisation or "—" }}</td>
+                <td style="text-align:right">
+                  <a class="btn" href="{{ url_for('inventaire_materiel.edit_item', item_id=it.id) }}">Ouvrir</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('inventaire_materiel.create_from_depense', depense_id=dep.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="grid two">
+        <div>
+          <label>Secteur</label>
+          <input name="secteur" value="{{ inventaire_secteur }}" {% if not can('scope:all_secteurs') %}readonly{% endif %}>
+        </div>
+        <div>
+          <label>Date d’entrée</label>
+          <input type="date" name="date_entree" value="{{ dep.date_paiement or '' }}">
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Désignation</label>
+          <input name="designation" placeholder="Ex: Ordinateur portable" value="{{ dep.libelle }}" required>
+        </div>
+        <div class="grid two" style="grid-template-columns:1fr 1fr; gap:10px">
+          <div>
+            <label>Quantité</label>
+            <input type="number" name="quantite" min="1" value="1">
+          </div>
+          <div>
+            <label>État</label>
+            <select name="etat">
+              {% for v in ["OK","A réparer","HS","Donné"] %}
+                <option value="{{ v }}">{{ v }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Catégorie (optionnel)</label>
+          <input name="categorie" placeholder="Informatique / Mobilier...">
+        </div>
+        <div>
+          <label>Localisation</label>
+          <input name="localisation" placeholder="Salle, bureau...">
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Valeur unitaire (€)</label>
+          <input type="number" step="0.01" name="valeur_unitaire" value="{{ dep.montant or '' }}">
+        </div>
+        <div>
+          <label>Notes</label>
+          <input name="notes" placeholder="Garantie, prêt, contexte...">
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn ok" type="submit">📦 Créer une entrée inventaire</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

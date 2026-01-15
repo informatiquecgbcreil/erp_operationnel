@@ -1,0 +1,120 @@
+/* ===== Base ===== */
+body {
+  background: #f6f7f9;
+  color: #111;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ===== Inputs & selects ===== */
+input,
+select,
+textarea {
+  background-color: #ffffff;
+  color: #111111;
+  border: 1px solid #cccccc;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* ===== Select spécifique (TON BUG) ===== */
+select option {
+  background-color: #ffffff;
+  color: #111111;
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+/* ===== Boutons ===== */
+button,
+.btn {
+  background: #e5e7eb;
+  color: #111;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover,
+.btn:hover {
+  background: #d1d5db;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+  text-align: left;
+  background: #f1f5f9;
+}
+
+/*
+ * Graphiques simplifiés sous forme de barres
+ *
+ * Chaque .bar-row contient une étiquette (.bar-label), une barre (.bar-chart) et des valeurs (.bar-values).
+ * Les segments colorés (.bar-segment) sont proportionnels aux montants via leur largeur.
+ */
+.bar-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:8px;
+}
+.bar-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.bar-label{
+  min-width:140px;
+  font-weight:600;
+  color: var(--text);
+}
+.bar-chart{
+  display:flex;
+  height:18px;
+  border-radius:8px;
+  overflow:hidden;
+  background: var(--surface-soft);
+  border:1px solid var(--border-soft);
+  flex-grow:1;
+}
+.bar-segment{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:11px;
+  white-space:nowrap;
+}
+.bar-segment.recu{
+  background: var(--accent);
+}
+.bar-segment.engage{
+  background: var(--warn);
+}
+.bar-segment.reste{
+  background: var(--ok);
+}
+.bar-values{
+  font-size:11px;
+  color: var(--muted);
+  white-space:nowrap;
+}
