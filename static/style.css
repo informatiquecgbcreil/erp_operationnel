@@ -118,3 +118,208 @@ th {
   color: var(--muted);
   white-space:nowrap;
 }
+
+/* ===== Budget synthèse (projets) ===== */
+.budget-header{
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.budget-header__top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.budget-header__main{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  flex-wrap:wrap;
+  gap:16px;
+}
+.budget-title{
+  margin:0 0 6px;
+  font-size:24px;
+  font-weight:800;
+}
+.budget-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  color: var(--muted);
+  font-size:13px;
+}
+.budget-header__context{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:flex-start;
+}
+.context-item{
+  border:1px solid var(--border-soft);
+  border-radius:12px;
+  padding:8px 12px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  min-width:180px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  border:1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+}
+.status-badge.status-ok{ color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, var(--border)); }
+.status-badge.status-warn{ color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, var(--border)); }
+.status-badge.status-danger{ color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, var(--border)); }
+.budget-nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.budget-section{
+  padding:16px;
+}
+.section-title{
+  margin:0 0 12px;
+  font-size:16px;
+  font-weight:800;
+}
+.kpi-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap:12px;
+}
+.kpi-card{
+  border:1px solid var(--border-soft);
+  border-radius:12px;
+  padding:12px;
+  background: var(--surface);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.kpi-label{
+  font-size:12px;
+  color: var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+.kpi-value{
+  font-size:22px;
+  font-weight:800;
+}
+.kpi-value--ok{ color: var(--ok); }
+.kpi-value--warn{ color: var(--warn); }
+.kpi-value--danger{ color: var(--danger); }
+.kpi-help{
+  font-size:12px;
+  color: var(--muted);
+}
+
+.balance-header p{
+  margin:0 0 10px;
+}
+.balance-bar{
+  display:flex;
+  height:18px;
+  border-radius:999px;
+  overflow:hidden;
+  background: var(--surface-soft);
+  border:1px solid var(--border-soft);
+}
+.balance-segment{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:700;
+  color:#fff;
+  white-space:nowrap;
+}
+.balance-segment--ok{ background: var(--ok); }
+.balance-segment--warn{ background: var(--warn); }
+.balance-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:8px;
+  font-size:12px;
+  color: var(--muted);
+}
+
+.budget-watch{
+  border-left:4px solid color-mix(in srgb, var(--warn) 65%, var(--border));
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+}
+.watch-list{
+  margin:0;
+  padding-left:18px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.macro-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap:14px;
+}
+.macro-card{
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  padding:14px;
+  background: var(--surface);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.macro-card h3{
+  margin:0 0 6px;
+  font-size:15px;
+}
+.macro-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  font-size:13px;
+}
+.mini-bar{
+  display:flex;
+  height:10px;
+  border-radius:999px;
+  overflow:hidden;
+  background: var(--surface-soft);
+  border:1px solid var(--border-soft);
+}
+.mini-segment{ height:100%; }
+.mini-segment--ok{ background: var(--ok); }
+.mini-segment--warn{ background: var(--warn); }
+.mini-segment--accent{ background: var(--accent); }
+.mini-segment--soft{ background: color-mix(in srgb, var(--border-soft) 60%, transparent); }
+
+.cta-section .cta-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.synthesis-sentence{
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  font-size:14px;
+}
+.synthesis-sentence p{
+  margin:0;
+}
