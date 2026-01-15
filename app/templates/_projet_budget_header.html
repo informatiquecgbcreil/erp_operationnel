@@ -1,56 +1,64 @@
 {% set bs = budget_stats|default({
     'total_charges': 0,
-    'total_produits_base': 0,
-    'total_ventile_charges': 0,
-    'total_ventile_produits': 0,
-    'pct_charges_financees': 0,
-    'pct_produits_ventiles': 0
+    'base_produits': 0,
+    'base_label': 'demandé'
 }, true) %}
 
-<div class="card mb-3">
-  <div class="card-body d-flex flex-wrap justify-content-between align-items-start gap-3">
+{% set total_charges = bs.total_charges or 0 %}
+{% set total_produits = bs.base_produits or 0 %}
+{% set ecart = total_charges - total_produits %}
+{% set pct_ecart = (ecart / total_charges * 100) if total_charges else 0 %}
+{% if ecart <= 0 %}
+  {% set statut_label = "Équilibré" %}
+  {% set statut_class = "status-ok" %}
+  {% set statut_emoji = "🟢" %}
+{% elif pct_ecart <= 10 %}
+  {% set statut_label = "Fragile" %}
+  {% set statut_class = "status-warn" %}
+  {% set statut_emoji = "🟠" %}
+{% else %}
+  {% set statut_label = "À risque" %}
+  {% set statut_class = "status-danger" %}
+  {% set statut_emoji = "🔴" %}
+{% endif %}
+{% set tab = active_tab|default('') %}
+
+<div class="budget-header">
+  <div class="budget-header__top">
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('projets.projets_edit', projet_id=projet.id) }}">← Retour projet</a>
+    <span class="status-badge {{ statut_class }}">{{ statut_emoji }} {{ statut_label }}</span>
+  </div>
+
+  <div class="budget-header__main">
     <div>
-      <div class="d-flex align-items-center gap-2 flex-wrap">
-        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('projets.projets_edit', projet_id=projet.id) }}">← Retour projet</a>
-        <div class="btn-group" role="group" aria-label="Budget AAP">
-          <a class="btn btn-sm {{ 'btn-primary' if request.path.endswith('/budget/charges') else 'btn-outline-primary' }}"
-             href="{{ url_for('projets.projet_budget_charges', projet_id=projet.id) }}">Charges</a>
-          <a class="btn btn-sm {{ 'btn-primary' if request.path.endswith('/budget/produits') else 'btn-outline-primary' }}"
-             href="{{ url_for('projets.projet_budget_produits', projet_id=projet.id) }}">Produits</a>
-          <a class="btn btn-sm {{ 'btn-primary' if request.path.endswith('/budget/ventilation') else 'btn-outline-primary' }}"
-             href="{{ url_for('projets.projet_budget_ventilation', projet_id=projet.id) }}">Ventilation</a>
-          <a class="btn btn-sm {{ 'btn-primary' if request.path.endswith('/budget/synthese') else 'btn-outline-primary' }}"
-             href="{{ url_for('projets.projet_budget_synthese', projet_id=projet.id) }}">Synthèse</a>
-        </div>
-      </div>
-      <div class="mt-2 small text-muted">
-        Projet : <strong>{{ projet.nom }}</strong> — Secteur : <strong>{{ projet.secteur }}</strong>
+      <h1 class="budget-title">{{ projet.nom }}</h1>
+      <div class="budget-meta">
+        <span>Secteur : <strong>{{ projet.secteur }}</strong></span>
+        {% if projet.created_at %}
+          <span>Année : <strong>{{ projet.created_at.year }}</strong></span>
+        {% endif %}
       </div>
     </div>
-
-    <div class="small">
-      Charges prévues : <strong>{{ "%.2f"|format(bs.total_charges or 0) }}€</strong><br>
-      Produits (base) : <strong>{{ "%.2f"|format(bs.total_produits_base or 0) }}€</strong><br>
-      Ventilé (charges) : <strong>{{ "%.2f"|format(bs.total_ventile_charges or 0) }}€</strong><br>
-      Ventilé (produits) : <strong>{{ "%.2f"|format(bs.total_ventile_produits or 0) }}€</strong>
+    <div class="budget-header__context">
+      <div class="context-item">
+        <span class="muted">Budget prévisionnel</span>
+        <strong>{{ "%.2f"|format(total_charges) }}€</strong>
+      </div>
+      <div class="context-item">
+        <span class="muted">Base produits ({{ bs.base_label or "demandé" }})</span>
+        <strong>{{ "%.2f"|format(total_produits) }}€</strong>
+      </div>
     </div>
+  </div>
 
-    <div style="min-width: 260px;">
-      <div class="small mb-1">Charges financées : <strong>{{ "%.0f"|format(bs.pct_charges_financees or 0) }}%</strong></div>
-      <div class="progress mb-2" style="height: 10px;">
-        <div class="progress-bar" role="progressbar" style="width: {{ bs.pct_charges_financees or 0 }}%;" aria-valuenow="{{ bs.pct_charges_financees or 0 }}" aria-valuemin="0" aria-valuemax="100"></div>
-      </div>
-
-      <div class="small mb-1">Produits ventilés : <strong>{{ "%.0f"|format(bs.pct_produits_ventiles or 0) }}%</strong></div>
-      <div class="progress" style="height: 10px;">
-        <div class="progress-bar" role="progressbar" style="width: {{ bs.pct_produits_ventiles or 0 }}%;" aria-valuenow="{{ bs.pct_produits_ventiles or 0 }}" aria-valuemin="0" aria-valuemax="100"></div>
-      </div>
-
-      {% if budget_stats is not defined %}
-      <div class="small text-muted mt-2">
-        (Info) stats budget non calculées pour cette vue — affichage par défaut.
-      </div>
-      {% endif %}
-    </div>
+  <div class="budget-nav" role="navigation" aria-label="Navigation budget">
+    <a class="btn btn-sm {{ 'btn-primary' if tab == 'synthese' or request.path.endswith('/budget/synthese') else 'btn-outline-primary' }}"
+       href="{{ url_for('projets.projet_budget_synthese', projet_id=projet.id) }}">Synthèse</a>
+    <a class="btn btn-sm {{ 'btn-primary' if tab == 'charges' or request.path.endswith('/budget/charges') else 'btn-outline-primary' }}"
+       href="{{ url_for('projets.projet_budget_charges', projet_id=projet.id) }}">Charges</a>
+    <a class="btn btn-sm {{ 'btn-primary' if tab == 'produits' or request.path.endswith('/budget/produits') else 'btn-outline-primary' }}"
+       href="{{ url_for('projets.projet_budget_produits', projet_id=projet.id) }}">Produits</a>
+    <a class="btn btn-sm {{ 'btn-primary' if tab == 'ventilation' or request.path.endswith('/budget/ventilation') else 'btn-outline-primary' }}"
+       href="{{ url_for('projets.projet_budget_ventilation', projet_id=projet.id) }}">Ventilation / Financeurs</a>
   </div>
 </div>
