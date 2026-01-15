@@ -12,7 +12,6 @@ docxtpl==0.16.8
 
 segno==1.6.1
 
-# Dépendances optionnelles (à installer selon l'usage)
-# Flask-Migrate
-# alembic
-# psycopg2-binary  # Postgres (ou psycopg[binary] si tu préfères)
+Flask-Migrate
+alembic
+psycopg2-binary
