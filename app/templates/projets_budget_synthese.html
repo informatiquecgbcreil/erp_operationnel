@@ -1,65 +1,218 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="stack">
+<div class="budget-container stack">
 
-  <div class="card">
+  <div class="card section-card">
     {% include "_projet_budget_header.html" %}
   </div>
 
-  <div class="card">
-    {% set total_charges = budget_stats.total_charges or 0 %}
-    {% set total_demande = budget_stats.total_demande or 0 %}
-    {% set total_accorde = budget_stats.total_accorde or 0 %}
-    {% set total_recu = budget_stats.total_recu or 0 %}
-    {% set total_reste = budget_stats.total_charges_reste or 0 %}
-    {% set pct_demande = (total_demande / total_charges * 100) if total_charges else 0 %}
-    {% set pct_accorde = (total_accorde / total_charges * 100) if total_charges else 0 %}
-    {% set pct_recu = (total_recu / total_charges * 100) if total_charges else 0 %}
+  {% set total_charges = budget_stats.total_charges or 0 %}
+  {% set total_charges_financees = budget_stats.total_charges_ventile or 0 %}
+  {% set total_charges_reste = budget_stats.total_charges_reste or 0 %}
+  {% set total_demande = budget_stats.total_demande or 0 %}
+  {% set total_accorde = budget_stats.total_accorde or 0 %}
+  {% set total_recu = budget_stats.total_recu or 0 %}
+  {% set total_produits = budget_stats.base_produits or 0 %}
+  {% set produits_label = budget_stats.base_label or "demandé" %}
+  {% set ecart = total_charges - total_produits %}
+  {% set pct_ecart = (ecart / total_charges * 100) if total_charges else 0 %}
+  {% set pct_finance_raw = (total_charges_financees / total_charges * 100) if total_charges else 0 %}
+  {% set pct_finance = 100 if pct_finance_raw > 100 else pct_finance_raw %}
+  {% set pct_non_finance = (total_charges_reste / total_charges * 100) if total_charges else 0 %}
+  {% set produits_attendus = total_accorde if total_accorde > 0 else total_demande %}
+  {% set pct_recu_raw = (total_recu / produits_attendus * 100) if produits_attendus else 0 %}
+  {% set pct_recu = 100 if pct_recu_raw > 100 else pct_recu_raw %}
+  {% set pct_securisation = (total_recu / produits_attendus * 100) if produits_attendus else 0 %}
 
-    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
-      <div class="card" style="padding:12px;">
-        <div class="muted">Total charges (prévisionnel)</div>
-        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_charges) }}€</div>
+  {% if ecart <= 0 %}
+    {% set statut_phrase = "équilibré" %}
+    {% set ecart_class = "kpi-value--ok" %}
+  {% elif pct_ecart <= 10 %}
+    {% set statut_phrase = "fragile" %}
+    {% set ecart_class = "kpi-value--warn" %}
+  {% else %}
+    {% set statut_phrase = "à risque" %}
+    {% set ecart_class = "kpi-value--danger" %}
+  {% endif %}
+
+  <section class="card section-card">
+    <div class="section-head">
+      <h2 class="section-title">Synthèse financière</h2>
+      <span class="section-tag">4 KPI essentiels</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi__label">Budget total</div>
+        <div class="kpi__value">{{ "%.2f"|format(total_charges) }}€</div>
+        <div class="kpi__help">Prévisionnel global du projet.</div>
       </div>
-      <div class="card" style="padding:12px;">
-        <div class="muted">Produits demandés</div>
-        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_demande) }}€</div>
-        <div style="height:8px; border-radius:999px; background:var(--surface-soft); overflow:hidden; margin-top:8px;">
-          <div style="height:8px; width:{{ pct_demande }}%; background:var(--accent);"></div>
-        </div>
+      <div class="kpi">
+        <div class="kpi__label">Charges totales</div>
+        <div class="kpi__value">{{ "%.2f"|format(total_charges) }}€</div>
+        <div class="kpi__help">Somme des charges prévues.</div>
       </div>
-      <div class="card" style="padding:12px;">
-        <div class="muted">Produits accordés</div>
-        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_accorde) }}€</div>
-        <div style="height:8px; border-radius:999px; background:var(--surface-soft); overflow:hidden; margin-top:8px;">
-          <div style="height:8px; width:{{ pct_accorde }}%; background:var(--ok);"></div>
-        </div>
+      <div class="kpi">
+        <div class="kpi__label">Produits totaux ({{ produits_label }})</div>
+        <div class="kpi__value">{{ "%.2f"|format(total_produits) }}€</div>
+        <div class="kpi__help">Base la plus solide disponible.</div>
       </div>
-      <div class="card" style="padding:12px;">
-        <div class="muted">Produits reçus</div>
-        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_recu) }}€</div>
-        <div style="height:8px; border-radius:999px; background:var(--surface-soft); overflow:hidden; margin-top:8px;">
-          <div style="height:8px; width:{{ pct_recu }}%; background:var(--accent);"></div>
-        </div>
-      </div>
-      <div class="card" style="padding:12px;">
-        <div class="muted">Reste à financer</div>
-        <div style="font-size:20px; font-weight:700;">{{ "%.2f"|format(total_reste) }}€</div>
-        <div class="muted" style="font-size:12px; margin-top:4px;">Écart à couvrir pour équilibrer le budget.</div>
+      <div class="kpi">
+        <div class="kpi__label">Écart global (charges - produits)</div>
+        <div class="kpi__value {{ ecart_class }}">{{ "%.2f"|format(ecart) }}€</div>
+        <div class="kpi__help">Seul indicateur coloré.</div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h3>Alertes</h3>
-    <ul>
-    {% for a in alertes %}
-      <li>{{ a }}</li>
-    {% else %}
-      <li class="muted">Aucune alerte, c’est presque louche.</li>
-    {% endfor %}
+  <section class="card section-card">
+    <div class="balance-header">
+      <h2 class="section-title">Barre d’équilibre du projet</h2>
+      <p class="muted">Visualisation rapide de la part financée et de la part à couvrir.</p>
+    </div>
+    <div class="meter" role="img" aria-label="Barre d'équilibre du budget">
+      <div class="meter__fill" style="width: {{ pct_finance }}%;">
+        {% if pct_finance > 14 %}Financé{% endif %}
+      </div>
+      <div class="meter__rest" style="width: {{ pct_non_finance }}%;">
+        {% if pct_non_finance > 14 %}À couvrir{% endif %}
+      </div>
+    </div>
+    <div class="meter-legend">
+      <span><strong>{{ "%.0f"|format(pct_finance) }}%</strong> financé — {{ "%.2f"|format(total_charges_financees) }}€</span>
+      <span><strong>{{ "%.0f"|format(pct_non_finance) }}%</strong> à couvrir — {{ "%.2f"|format(total_charges_reste) }}€</span>
+    </div>
+  </section>
+
+  <section class="card section-card callout">
+    <div class="section-head">
+      <h2 class="section-title">À surveiller</h2>
+      <span class="section-tag">Max 3 alertes</span>
+    </div>
+    <ul class="watch-list">
+      {% for a in alertes[:3] %}
+        {% set amount = a.split('(')[-1].replace(')', '') if '(' in a and ')' in a else '' %}
+        {% if "Charge non financée" in a %}
+          {% set detail = a.replace("Charge non financée : ", "").split('(')[0].strip() %}
+          <li class="watch-item">
+            <span>Une charge reste à financer : {{ detail }}.</span>
+            {% if amount %}<span class="pill">{{ amount }}</span>{% endif %}
+          </li>
+        {% elif "Produit non ventilé" in a %}
+          {% set detail = a.replace("Produit non ventilé : ", "").split('(')[0].strip() %}
+          <li class="watch-item">
+            <span>Un financement est encore à ventiler : {{ detail }}.</span>
+            {% if amount %}<span class="pill">{{ amount }}</span>{% endif %}
+          </li>
+        {% else %}
+          <li class="watch-item">
+            <span>{{ a }}</span>
+            {% if amount %}<span class="pill">{{ amount }}</span>{% endif %}
+          </li>
+        {% endif %}
+      {% else %}
+        <li class="watch-item muted">Rien de bloquant identifié : la trajectoire est claire.</li>
+      {% endfor %}
     </ul>
-  </div>
+    {% if alertes|length > 3 %}
+      <button class="btn btn-sm btn-outline-primary watch-toggle" type="button" data-watch-toggle="budget-watch-more">
+        Voir {{ alertes|length - 3 }} autres
+      </button>
+      <ul class="watch-list watch-list--hidden" id="budget-watch-more">
+        {% for a in alertes[3:] %}
+          <li class="watch-item">
+            <span>{{ a }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  <section class="card section-card">
+    <div class="section-head">
+      <h2 class="section-title">Aperçu charges &amp; produits</h2>
+      <span class="section-tag">Vue macro</span>
+    </div>
+    <div class="macro-grid">
+      <div class="macro-card">
+        <div class="macro-head">
+          <h3>Charges</h3>
+          <span class="pill pill--muted">Suivi dépenses</span>
+        </div>
+        <div class="macro-line">
+          <span class="muted">Charges totales</span>
+          <strong>{{ "%.2f"|format(total_charges) }}€</strong>
+        </div>
+        <div class="macro-line">
+          <span class="muted">Charges financées</span>
+          <strong>{{ "%.2f"|format(total_charges_financees) }}€</strong>
+        </div>
+        <div class="macro-line">
+          <span class="muted">Charges non financées</span>
+          <strong>{{ "%.2f"|format(total_charges_reste) }}€</strong>
+        </div>
+        <div class="mini-meter">
+          <div class="mini-meter__fill" style="width: {{ pct_finance }}%;"></div>
+          <div class="mini-meter__rest" style="width: {{ pct_non_finance }}%;"></div>
+        </div>
+      </div>
+
+      <div class="macro-card">
+        <div class="macro-head">
+          <h3>Produits</h3>
+          <span class="pill pill--ok">Sécurisation {{ "%.0f"|format(pct_securisation) }}%</span>
+        </div>
+        <div class="macro-line">
+          <span class="muted">Produits obtenus</span>
+          <strong>{{ "%.2f"|format(total_recu) }}€</strong>
+        </div>
+        <div class="macro-line">
+          <span class="muted">Produits attendus</span>
+          <strong>{{ "%.2f"|format(produits_attendus) }}€</strong>
+        </div>
+        <div class="macro-line">
+          <span class="muted">Taux de sécurisation</span>
+          <strong>{{ "%.0f"|format(pct_securisation) }}%</strong>
+        </div>
+        <div class="mini-meter">
+          <div class="mini-meter__fill mini-meter__fill--accent" style="width: {{ pct_recu }}%;"></div>
+          <div class="mini-meter__rest" style="width: {{ 100 - pct_recu }}%;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card section-card cta-section">
+    <div class="section-head">
+      <h2 class="section-title">Accès aux détails</h2>
+      <span class="section-tag">Aller plus loin</span>
+    </div>
+    <div class="cta-row">
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('projets.projet_budget_charges', projet_id=projet.id) }}">Voir les charges</a>
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('projets.projet_budget_produits', projet_id=projet.id) }}">Voir les produits</a>
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('projets.projet_budget_ventilation', projet_id=projet.id) }}">Voir la ventilation / financeurs</a>
+    </div>
+  </section>
+
+  <section class="card section-card synthesis-sentence">
+    <p>
+      Le projet est actuellement <strong>{{ statut_phrase }}</strong>,
+      et {{ "%.0f"|format(pct_non_finance) }} % du budget reste à financer
+      ({{ "%.2f"|format(total_charges_reste) }}€).
+    </p>
+  </section>
 
 </div>
+
+<script>
+  document.querySelectorAll("[data-watch-toggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = document.getElementById(btn.dataset.watchToggle);
+      if (!target) return;
+      target.classList.toggle("watch-list--hidden");
+      btn.textContent = target.classList.contains("watch-list--hidden")
+        ? btn.textContent.replace("Masquer", "Voir")
+        : "Masquer les alertes";
+    });
+  });
+</script>
 {% endblock %}
