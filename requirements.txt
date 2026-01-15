@@ -12,6 +12,6 @@ docxtpl==0.16.8
 
 segno==1.6.1
 
-pip install Flask-Migrate alembic
-# et selon tes drivers :
-pip install psycopg2-binary  # Postgres (ou psycopg[binary] si tu préfères)
+Flask-Migrate
+alembic
+psycopg2-binary
