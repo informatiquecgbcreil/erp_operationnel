@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="stack">
+<div class="budget-container stack">
 
-  <div class="card">
+  <div class="card section-card">
     {% include "_projet_budget_header.html" %}
   </div>
 
@@ -165,4 +165,17 @@
   </section>
 
 </div>
+
+<script>
+  document.querySelectorAll("[data-watch-toggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = document.getElementById(btn.dataset.watchToggle);
+      if (!target) return;
+      target.classList.toggle("watch-list--hidden");
+      btn.textContent = target.classList.contains("watch-list--hidden")
+        ? btn.textContent.replace("Masquer", "Voir")
+        : "Masquer les alertes";
+    });
+  });
+</script>
 {% endblock %}
